@@ -3,14 +3,12 @@ import type { zh } from "./zh";
 export const en: typeof zh = {
   app: {
     loading: "Loading...",
-    startBuilding: "Start Building Your Project",
+    startBuilding: "Your canvas is waiting",
     startBuildingDesc:
-      "Describe the app you want to create in the left chat box, and AI will generate complete project code for you.",
+      "Describe a banner or marketing asset in the chat on the left. Your design will appear here, ready to review and export.",
     startBuildingDescTablet:
-      "Describe the app you want to create in the chat panel below, and AI will generate complete project code for you.",
-    resources: "Open Builder resources",
-    officialWebsite: "Official website",
-    openSourceProject: "Open-source project",
+      "Describe a banner or marketing asset in the chat below. Your design will appear here, ready to review and export.",
+    credit: "Based on the open-source Open Builder project",
   },
   notifications: {
     label: "Notifications",
@@ -522,6 +520,9 @@ export const en: typeof zh = {
   header: {
     sessions: "Sessions",
     settings: "Settings",
+  },
+  warning: {
+    openSettings: "Open Settings",
   },
   welcome: {
     title: "Let's make something",

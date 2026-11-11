@@ -1,14 +1,12 @@
 export const zh = {
   app: {
     loading: "加载中...",
-    startBuilding: "开始构建你的项目",
+    startBuilding: "画布已就绪",
     startBuildingDesc:
-      "在左侧对话框中描述你想要创建的应用，AI 将为你生成完整的项目代码。",
+      "在左侧对话框中描述你想要的横幅或营销素材，设计会出现在这里，方便你查看和导出。",
     startBuildingDescTablet:
-      "在下方对话框中描述你想要创建的应用，AI 将为你生成完整的项目代码。",
-    resources: "Open Builder 资源",
-    officialWebsite: "官方网站",
-    openSourceProject: "开源项目",
+      "在下方对话框中描述你想要的横幅或营销素材，设计会出现在这里，方便你查看和导出。",
+    credit: "基于开源项目 Open Builder",
   },
   notifications: {
     label: "通知",
@@ -484,6 +482,9 @@ export const zh = {
   header: {
     sessions: "会话列表",
     settings: "设置",
+  },
+  warning: {
+    openSettings: "打开设置",
   },
   welcome: {
     title: "来做点什么吧",
