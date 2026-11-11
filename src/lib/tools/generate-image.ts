@@ -1,10 +1,10 @@
 import { tool } from "ai";
 import { z } from "zod";
 import {
-  IMAGE_ASPECT_RATIOS,
   IMAGE_RESOLUTIONS,
   type OpenRouterImageClient,
 } from "../ai/openrouter";
+import { IMAGE_ASPECT_RATIOS } from "../artboard/presets";
 import type {
   ToolExecutionContext,
   ToolExecutionOutput,

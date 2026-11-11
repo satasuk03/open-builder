@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AISettings } from "../../store/settings/ai";
+import type { ImageAspectRatio } from "../artboard/presets";
 import { DEFAULT_ATTACHMENT_CONSTRAINTS } from "../utils/attachments";
 
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api";
@@ -47,20 +48,6 @@ const OPENROUTER_IMAGE_MODELS_URL =
   "https://openrouter.ai/api/v1/images/models";
 const IMAGE_REQUEST_TIMEOUT_MS = 120_000;
 const MAX_ERROR_DETAIL_CHARS = 400;
-
-export const IMAGE_ASPECT_RATIOS = [
-  "1:1",
-  "16:9",
-  "9:16",
-  "4:3",
-  "3:4",
-  "3:2",
-  "2:3",
-  "4:5",
-  "5:4",
-  "21:9",
-] as const;
-export type ImageAspectRatio = (typeof IMAGE_ASPECT_RATIOS)[number];
 
 // The values OPENROUTER_IMAGE_MODEL accepts, minus "4K": a 4K PNG routinely
 // exceeds the project asset size cap.
