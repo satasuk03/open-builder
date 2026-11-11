@@ -1,3 +1,5 @@
+import type { ArtboardId } from "../lib/artboard/presets";
+
 export const zh = {
   app: {
     loading: "加载中...",
@@ -1159,6 +1161,26 @@ export const zh = {
     retry: "重试",
     unavailable: "截图需要受支持且已加载的预览。",
     exportFailed: "导出截图失败，请重试。",
+  },
+  artboard: {
+    label: "画板",
+    menuTitle: "画板尺寸",
+    responsive: "自适应预览",
+    responsiveHint: "桌面、平板与手机",
+    presets: {
+      og: "Open Graph 分享图",
+      square: "方形帖子",
+      portrait: "竖版帖子",
+      story: "快拍",
+      landscape: "横版",
+      "x-header": "X 头图",
+      "linkedin-banner": "LinkedIn 横幅",
+    } satisfies Record<ArtboardId, string>,
+    exportPng: "PNG {ratio}x",
+    exportHeading: "导出画板",
+    sizeMismatch: "画板预览不是精确尺寸，无法导出。请关闭控制台后重试。",
+    wrongPngSize:
+      "导出的图片尺寸不对（{actual}，应为 {expected}），已取消保存。",
   },
   annotation: {
     title: "批注预览",

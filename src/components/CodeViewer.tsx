@@ -44,6 +44,10 @@ import {
 import { assessProjectRuntime } from "../lib/project-runtime/capabilities";
 import type { ProjectFileChangeGuard } from "./code-viewer/sandpack-file-changes";
 import { ViewToolbar } from "./code-viewer/ViewToolbar";
+import {
+  setConversationArtboard,
+  useConversationArtboard,
+} from "../store/artboard";
 import { PreviewAnnotation } from "./code-viewer/PreviewAnnotation";
 import {
   PreviewScreenshot,
@@ -118,6 +122,8 @@ import {
   withPreviewCaptureLock,
   type PreviewCaptureCollection,
   type PreviewRuntimeAdapter,
+  type AnnotationCaptureOptions,
+  type ExportPixelRatio,
   type PreviewCaptureScope,
   type PreviewCaptureOptions,
   type PrototypePreviewTarget,
@@ -472,8 +478,13 @@ export function CodeViewer({
   const [screenshotMode, setScreenshotMode] = useState<ScreenshotMode | null>(
     null,
   );
+  const [exportPixelRatio, setExportPixelRatio] =
+    useState<ExportPixelRatio | null>(null);
   const imageCaptureOpen = annotationOpen || screenshotMode !== null;
-  const closeScreenshot = useCallback(() => setScreenshotMode(null), []);
+  const closeScreenshot = useCallback(() => {
+    setScreenshotMode(null);
+    setExportPixelRatio(null);
+  }, []);
   const [designFocus, setDesignFocus] = useState(false);
   const [canvasRuntimeEpoch, setCanvasRuntimeEpoch] = useState(0);
   const [canvasFocusRequest, setCanvasFocusRequest] = useState<{
@@ -667,17 +678,19 @@ export function CodeViewer({
     setPageSourceMissing(false);
   }, [workspaceKey]);
 
-  const deviceDimensions = captureViewport
-    ? { width: captureViewport.width, height: captureViewport.height }
+  const artboard = useConversationArtboard(conversationId);
+  const frameViewport = captureViewport ?? (canvasMode ? null : artboard);
+  const deviceDimensions = frameViewport
+    ? { width: frameViewport.width, height: frameViewport.height }
     : canvasMode && deviceSize === "desktop"
       ? { width: 1440, height: 900 }
       : deviceSize === "tablet"
         ? { width: 768, height: 1024 }
         : { width: 375, height: 667 };
   const fixedPreview =
-    captureViewport !== null || deviceSize !== "desktop" || canvasMode;
+    frameViewport !== null || deviceSize !== "desktop" || canvasMode;
   const previewScale = resolvePreviewScale({
-    captureActive: captureViewport !== null,
+    captureActive: frameViewport !== null,
     requestedScale: canvasMode ? 1 : requestedScale,
   });
 
@@ -698,7 +711,7 @@ export function CodeViewer({
   }, [normalizedDefaultPreviewView]);
 
   useEffect(() => {
-    if (!captureViewport) return;
+    if (!frameViewport) return;
     const host = previewHostRef.current;
     if (!host) return;
     const update = () => {
@@ -722,7 +735,7 @@ export function CodeViewer({
     observer.observe(host);
     return () => observer.disconnect();
   }, [
-    captureViewport,
+    frameViewport,
     deviceDimensions.height,
     deviceDimensions.width,
     viewMode,
@@ -1148,7 +1161,13 @@ export function CodeViewer({
       currentViewport = false,
       scope: PreviewCaptureScope = currentViewport ? "viewport" : "full-page",
       output: Output = "evidence" as Output,
+      pixelRatio?: ExportPixelRatio,
     ): Promise<CaptureResult<Output>> {
+      if (pixelRatio !== undefined && output !== "annotation") {
+        return Promise.reject(
+          new Error("Only annotation captures take a pixel ratio."),
+        );
+      }
       const iframe = getPreviewIframe();
       if (!iframe?.contentWindow) {
         return Promise.reject(new Error("Preview iframe is not available."));
@@ -1176,6 +1195,7 @@ export function CodeViewer({
         scope,
         output,
         ...(target ? { target } : {}),
+        ...(pixelRatio !== undefined ? { pixelRatio } : {}),
       };
       return new Promise<
         DesignBridgeCaptureResult | DesignBridgeAnnotationCaptureResult
@@ -1232,6 +1252,7 @@ export function CodeViewer({
               currentViewport,
               scope,
               output,
+              ...(pixelRatio !== undefined ? { pixelRatio } : {}),
               viewport: {
                 name: viewport.name,
                 width: viewport.width,
@@ -1910,12 +1931,24 @@ export function CodeViewer({
       signal: AbortSignal,
       scope: PreviewCaptureScope = "viewport",
       output: Output = "evidence" as Output,
+      options?: AnnotationCaptureOptions,
     ) {
       const iframe = getPreviewIframe();
       if (!iframe || iframe.clientWidth < 240 || iframe.clientHeight < 240) {
         throw new PreviewRuntimeError(
           "preview_unavailable",
           "The current preview is hidden or has no capturable viewport.",
+        );
+      }
+      const expected = options?.expectViewport;
+      if (
+        expected &&
+        (iframe.clientWidth !== expected.width ||
+          iframe.clientHeight !== expected.height)
+      ) {
+        throw new PreviewRuntimeError(
+          "artboard_size_mismatch",
+          `The artboard preview is ${iframe.clientWidth}x${iframe.clientHeight}, not ${expected.width}x${expected.height}.`,
         );
       }
       const width = iframe.clientWidth;
@@ -1930,6 +1963,7 @@ export function CodeViewer({
         true,
         scope,
         output,
+        options?.pixelRatio,
       );
     },
     [getPreviewIframe, requestPreviewCapture],
@@ -1964,8 +1998,8 @@ export function CodeViewer({
       prepareCurrent: prepareCurrentPreview,
       captureCurrent: (generation, signal, options) =>
         captureCurrentPreview(generation, signal, options?.scope),
-      captureAnnotation: (generation, signal, scope) =>
-        captureCurrentPreview(generation, signal, scope, "annotation"),
+      captureAnnotation: (generation, signal, scope, options) =>
+        captureCurrentPreview(generation, signal, scope, "annotation", options),
       navigateToTarget: async (target, generation, signal) => {
         await waitForDesignBridge(generation, signal);
         await requestPreviewNavigation(target, generation, signal);
@@ -2010,8 +2044,8 @@ export function CodeViewer({
         currentAdapter().prepareCurrent!(generation, signal),
       captureCurrent: (generation, signal, options) =>
         currentAdapter().captureCurrent!(generation, signal, options),
-      captureAnnotation: (generation, signal, scope) =>
-        currentAdapter().captureAnnotation!(generation, signal, scope),
+      captureAnnotation: (generation, signal, scope, options) =>
+        currentAdapter().captureAnnotation!(generation, signal, scope, options),
       navigateToTarget: (target, generation, signal) =>
         currentAdapter().navigateToTarget!(target, generation, signal),
       capture: (viewports, generation, signal, target, options) =>
@@ -3001,7 +3035,7 @@ export function CodeViewer({
       ? requestedCurrentFile
       : (Object.keys(previewFiles)[0] ?? requestedCurrentFile);
   const sandpackCurrentFile = `/${effectiveCurrentFile}`;
-  const previewFrameScale = captureViewport ? captureFitScale : 1;
+  const previewFrameScale = frameViewport ? captureFitScale : 1;
   const previewHostOverflowClass = fixedPreview
     ? "overflow-auto p-4"
     : "overflow-hidden";
@@ -3015,7 +3049,7 @@ export function CodeViewer({
     ? {
         width: deviceDimensions.width,
         height: deviceDimensions.height,
-        ...(captureViewport
+        ...(frameViewport
           ? {
               transform: `scale(${previewFrameScale})`,
               transformOrigin: "top left",
@@ -3096,6 +3130,7 @@ export function CodeViewer({
         onScreenshot={(mode) => {
           deactivateDesignSelection();
           toast.dismiss(desktopActionToastId);
+          setExportPixelRatio(null);
           setScreenshotMode(mode);
         }}
         screenshotUnavailableReason={
@@ -3105,6 +3140,16 @@ export function CodeViewer({
             ? t.screenshot.unavailable
             : undefined
         }
+        artboard={{
+          value: artboard?.id ?? null,
+          onChange: (id) => setConversationArtboard(conversationId, id),
+          onExport: (pixelRatio) => {
+            deactivateDesignSelection();
+            toast.dismiss(desktopActionToastId);
+            setExportPixelRatio(pixelRatio);
+            setScreenshotMode("viewport");
+          },
+        }}
         designSelectionSupported={bridgeInjection.supported}
         designSelectionActive={designSelectionActive}
         onToggleDesignSelection={() =>
@@ -3326,7 +3371,7 @@ export function CodeViewer({
                             "grid grid-rows-3 h-full",
                             fixedPreview &&
                               "overflow-hidden rounded-lg bg-background shadow-lg",
-                            captureViewport &&
+                            frameViewport &&
                               "absolute left-0 top-0 rounded-none shadow-none transition-none",
                           )}
                           style={previewSurfaceStyle}
@@ -3345,7 +3390,7 @@ export function CodeViewer({
                                 previewScale !== 1 && "preview-content-scaled",
                               )}
                               style={previewContentStyle}
-                              showNavigator={!captureViewport && !canvasMode}
+                              showNavigator={!frameViewport && !canvasMode}
                               showOpenInCodeSandbox={false}
                               showRefreshButton={false}
                               showRestartButton={false}
@@ -3503,6 +3548,15 @@ export function CodeViewer({
           <PreviewScreenshot
             conversationId={conversationId}
             mode={screenshotMode}
+            exportSize={
+              artboard && exportPixelRatio
+                ? {
+                    width: artboard.width,
+                    height: artboard.height,
+                    pixelRatio: exportPixelRatio,
+                  }
+                : undefined
+            }
             onClose={closeScreenshot}
           />
         )}
