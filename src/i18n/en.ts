@@ -62,7 +62,7 @@ export const en: typeof zh = {
     },
     model: {
       label: "Model Name",
-      hint: "AI model name, e.g. gpt-5.6-sol, deepseek-chat",
+      hint: "Model id, e.g. anthropic/claude-sonnet-5.5, openai/gpt-6.1-sol",
       selectPlaceholder: "Select a model",
     },
     runtime: {

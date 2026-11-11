@@ -295,7 +295,7 @@ export function SettingsDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="flex h-[100dvh] max-h-[100dvh] max-w-full flex-col gap-0 rounded-none border-x-0 p-0 sm:h-auto sm:max-h-[90dvh] sm:max-w-md sm:gap-4 sm:rounded-lg sm:border sm:p-6"
+        className="flex h-[100dvh] max-h-[100dvh] max-w-full flex-col gap-0 rounded-none border-x-0 p-0 sm:h-auto sm:max-h-[90dvh] sm:max-w-lg sm:gap-4 sm:rounded-lg sm:border sm:p-6"
         onCloseAutoFocus={handleCloseAutoFocus}
       >
         <DialogHeader className="sticky top-0 z-10 shrink-0 border-b bg-background px-4 py-4 pr-12 sm:static sm:border-b-0 sm:px-2 sm:py-0 sm:pr-2">
@@ -310,31 +310,31 @@ export function SettingsDialog({
           <TabsList className="w-full shrink-0 justify-start overflow-x-auto sm:justify-center sm:overflow-visible">
             <TabsTrigger
               value="model"
-              className="min-w-fit px-1.5 text-xs sm:min-w-0 sm:px-2 sm:text-sm"
+              className="min-w-fit px-1.5 text-xs sm:px-2 sm:text-sm"
             >
               {t.settings.tabs.model}
             </TabsTrigger>
             <TabsTrigger
               value="search"
-              className="min-w-fit px-1.5 text-xs sm:min-w-0 sm:px-2 sm:text-sm"
+              className="min-w-fit px-1.5 text-xs sm:px-2 sm:text-sm"
             >
               {t.settings.tabs.search}
             </TabsTrigger>
             <TabsTrigger
               value="storage"
-              className="min-w-fit px-1.5 text-xs sm:min-w-0 sm:px-2 sm:text-sm"
+              className="min-w-fit px-1.5 text-xs sm:px-2 sm:text-sm"
             >
               {t.settings.tabs.storage}
             </TabsTrigger>
             <TabsTrigger
               value="system"
-              className="min-w-fit px-1.5 text-xs sm:min-w-0 sm:px-2 sm:text-sm"
+              className="min-w-fit px-1.5 text-xs sm:px-2 sm:text-sm"
             >
               {t.settings.tabs.system}
             </TabsTrigger>
             <TabsTrigger
               value="advanced"
-              className="min-w-fit px-1.5 text-xs sm:min-w-0 sm:px-2 sm:text-sm"
+              className="min-w-fit px-1.5 text-xs sm:px-2 sm:text-sm"
             >
               {t.settings.tabs.advanced}
             </TabsTrigger>

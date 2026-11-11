@@ -61,7 +61,7 @@ export const zh = {
     },
     model: {
       label: "模型名称",
-      hint: "AI 模型的名称，如 gpt-5.6-sol、deepseek-chat 等",
+      hint: "AI 模型的名称，如 anthropic/claude-sonnet-5.5、openai/gpt-6.1-sol 等",
       selectPlaceholder: "选择模型",
     },
     runtime: {
