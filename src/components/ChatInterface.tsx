@@ -26,7 +26,7 @@ import { ProjectBuildDialog } from "./code-viewer/ProjectBuildDialog";
 import type { ProjectBuildTarget } from "../lib/project-build/target";
 import { AskUserQuestionCard } from "./chat/AskUserQuestionCard";
 import { GeneratingIndicator } from "./chat/GeneratingIndicator";
-import { SettingsWarning } from "./chat/SettingsWarning";
+import { FirstRunWelcome } from "./chat/FirstRunWelcome";
 import {
   LocalCliStatusNotice,
   type LocalCliStatusNoticeValue,
@@ -902,7 +902,7 @@ export function ChatInterface({
           onScroll={updateAutoScrollIntent}
         >
           {!hasConfiguredModelRuntime && (
-            <SettingsWarning onOpenSettings={onOpenSettings} />
+            <FirstRunWelcome onOpenSettings={onOpenSettings} />
           )}
 
           {hasConfiguredModelRuntime && localCliStatusNotice ? (

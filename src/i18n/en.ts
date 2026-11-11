@@ -367,30 +367,30 @@ export const en: typeof zh = {
     projectRoot: "(entire project)",
   },
   empty: {
-    title: "Start with an idea",
+    title: "What are we designing?",
     description:
-      "Tell me who your app is for, what it should do, and the style you like.",
+      "Tell me what the asset is for, where it will appear, and the look you want.",
     referenceHint:
-      "You can also upload a reference screenshot and describe what to keep or change.",
+      "You can also upload a logo or a reference image and describe what to keep or change.",
     suggestionsLabel: "Quick suggestions",
     suggestions: {
-      portfolio: {
-        title: "Personal portfolio",
-        description: "Showcase your work, bio, and contact details",
+      launch: {
+        title: "Product launch banner",
+        description: "A 1200 x 630 Open Graph image for a new release",
         prompt:
-          "Create a designer portfolio with a personal introduction, a project showcase, and contact details. Use a simple black and white style and make it work on mobile.",
+          "Design a 1200 x 630 Open Graph banner announcing a product launch. Use a bold headline, a short supporting line, a clear product visual area, and a confident two-colour palette. Keep key text away from the edges.",
       },
-      tasks: {
-        title: "Task manager",
-        description: "Set priorities and track completed tasks",
+      instagram: {
+        title: "Instagram square promo",
+        description: "A 1080 x 1080 post for a seasonal offer",
         prompt:
-          "Create a personal task manager with task creation, priorities, completion tracking, and filters. Save data locally and keep the interface clear and simple.",
+          "Design a 1080 x 1080 Instagram promo post for a seasonal sale. Use a large offer number, a short call to action, playful shapes, and a warm, eye-catching palette that stays legible on a phone.",
       },
-      cafe: {
-        title: "Coffee shop website",
-        description: "Introduce your menu and location in three pages",
+      linkedin: {
+        title: "LinkedIn header",
+        description: "A 1584 x 396 cover for a company page",
         prompt:
-          "Create a coffee shop website with three pages: home, menu, and location. Use a warm, natural style and make it work on mobile.",
+          "Design a 1584 x 396 LinkedIn company page header. Use a clean layout with the company tagline on the left, a subtle brand pattern on the right, and a calm, professional palette. Leave space where the profile photo overlaps the bottom left.",
       },
     },
   },
@@ -523,10 +523,15 @@ export const en: typeof zh = {
     sessions: "Sessions",
     settings: "Settings",
   },
-  warning: {
-    title: "AI Model Configuration Required",
-    desc: "Please configure your API Key and model settings to get started",
-    openSettings: "Open Settings",
+  welcome: {
+    title: "Let's make something",
+    desc: "Describe a banner, social post or any marketing asset and Open Builder designs it for you. Paste an OpenRouter key to start.",
+    keyLabel: "OpenRouter API key",
+    save: "Save key",
+    saved: "Key saved.",
+    privacy: "Your key is stored only in this browser. It is never sent to us.",
+    getKey: "Get a key from OpenRouter",
+    moreSettings: "Open full settings",
   },
   sessions: {
     title: "Sessions",
