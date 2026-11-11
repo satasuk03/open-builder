@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import type { ProjectAssets, ProjectFiles } from "../../types";
 import { readProjectAssetBytes } from "../project-assets/core";
+import { relativizePublicAssetUrls } from "../project-assets/static-export";
 import { isSensitiveProjectPath } from "../utils/project-file-policy";
 import { assessProjectRuntime } from "../project-runtime/capabilities";
 import {
@@ -84,7 +85,9 @@ export async function buildStaticDeployment(
   let output: Record<string, Uint8Array>;
   if (mode === "static") {
     output = {};
-    for (const [path, content] of Object.entries(files)) {
+    for (const [path, content] of Object.entries(
+      relativizePublicAssetUrls(files, assets),
+    )) {
       if (
         !isPreviewFile(path) &&
         !isSensitiveProjectPath(path) &&
