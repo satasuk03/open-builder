@@ -6,6 +6,7 @@ import {
   MODEL_LIST_LIMITS,
   resolveBaseURL,
 } from "./provider-config";
+import { OPENROUTER_DEFAULT_CHAT_MODEL } from "./openrouter";
 
 describe("provider config helpers", () => {
   afterEach(() => {
@@ -21,10 +22,10 @@ describe("provider config helpers", () => {
     );
   });
 
-  it("defaults only OpenAI-family API providers to the unified model", () => {
+  it("defaults OpenAI to its model and OpenAI-compatible to OpenRouter's", () => {
     expect(defaultModelForApiType("openai")).toBe(DEFAULT_OPENAI_MODEL);
     expect(defaultModelForApiType("openai-compatible")).toBe(
-      DEFAULT_OPENAI_MODEL,
+      OPENROUTER_DEFAULT_CHAT_MODEL,
     );
     expect(defaultModelForApiType("anthropic")).toBe("");
     expect(defaultModelForApiType("google")).toBe("");

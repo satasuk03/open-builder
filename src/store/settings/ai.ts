@@ -1,8 +1,9 @@
 import type { StateCreator } from "zustand";
+import type { ApiType } from "../../lib/ai/provider-config";
 import {
-  DEFAULT_OPENAI_MODEL,
-  type ApiType,
-} from "../../lib/ai/provider-config";
+  OPENROUTER_BASE_URL,
+  OPENROUTER_DEFAULT_CHAT_MODEL,
+} from "../../lib/ai/openrouter";
 import {
   queryLocalAgentSupport,
   resetLocalAgentSupportCache,
@@ -52,8 +53,8 @@ export const aiDefaults: AISettings = {
   runtime: "api",
   apiType: "openai-compatible",
   apiKey: "",
-  apiBaseUrl: "",
-  model: DEFAULT_OPENAI_MODEL,
+  apiBaseUrl: OPENROUTER_BASE_URL,
+  model: OPENROUTER_DEFAULT_CHAT_MODEL,
   localAgent: {
     provider: "codex",
     preferences: {

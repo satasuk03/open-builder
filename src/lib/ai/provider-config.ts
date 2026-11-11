@@ -1,16 +1,20 @@
+import {
+  OPENROUTER_BASE_URL,
+  OPENROUTER_DEFAULT_CHAT_MODEL,
+} from "./openrouter";
+
 export type ApiType = "openai-compatible" | "openai" | "anthropic" | "google";
 
 export const DEFAULT_OPENAI_MODEL = "gpt-5.6-sol";
 
 export function defaultModelForApiType(apiType: ApiType): string {
-  return apiType === "openai" || apiType === "openai-compatible"
-    ? DEFAULT_OPENAI_MODEL
-    : "";
+  if (apiType === "openai-compatible") return OPENROUTER_DEFAULT_CHAT_MODEL;
+  return apiType === "openai" ? DEFAULT_OPENAI_MODEL : "";
 }
 
 /** Default API base URLs without version suffixes. */
 export const DEFAULT_BASE_URLS: Record<ApiType, string> = {
-  "openai-compatible": "http://localhost:11434",
+  "openai-compatible": OPENROUTER_BASE_URL,
   openai: "https://api.openai.com",
   anthropic: "https://api.anthropic.com",
   google: "https://generativelanguage.googleapis.com",
