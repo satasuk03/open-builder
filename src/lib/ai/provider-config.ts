@@ -30,7 +30,7 @@ const DEFAULT_VERSION_PATHS: Record<ApiType, string> = {
 export const MODEL_LIST_LIMITS = {
   timeoutMs: 10_000,
   maxResponseBytes: 2 * 1024 * 1024,
-  maxModels: 200,
+  maxModels: 1000,
   maxModelIdChars: 160,
 } as const;
 
@@ -58,11 +58,9 @@ function finalizeModelIds(values: unknown[]): string[] {
   const out = new Set<string>();
   for (const value of values) {
     const model = normalizeModelId(value);
-    if (!model) continue;
-    out.add(model);
-    if (out.size >= MODEL_LIST_LIMITS.maxModels) break;
+    if (model) out.add(model);
   }
-  return Array.from(out).sort();
+  return Array.from(out).sort().slice(0, MODEL_LIST_LIMITS.maxModels);
 }
 
 async function fetchWithTimeout(

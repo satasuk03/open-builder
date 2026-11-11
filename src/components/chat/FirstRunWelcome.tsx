@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useT } from "../../i18n";
+import { withOpenRouterKey } from "../../lib/ai/openrouter";
 import { useSettingsStore } from "../../store/settings";
 
 const OPENROUTER_KEYS_URL = "https://openrouter.ai/keys";
@@ -19,10 +20,10 @@ export function FirstRunWelcome({ onOpenSettings }: FirstRunWelcomeProps) {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const apiKey = key.trim();
-    if (!apiKey) return;
     const { ai, setAI } = useSettingsStore.getState();
-    setAI({ ...ai, apiKey });
+    const next = withOpenRouterKey(ai, key);
+    if (!next) return;
+    setAI(next);
     setKey("");
     setSaved(true);
   };
