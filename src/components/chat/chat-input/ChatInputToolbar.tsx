@@ -197,7 +197,7 @@ export function ChatInputToolbar({
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="h-7 max-w-28 gap-1 px-1.5 text-xs text-violet-600 hover:text-violet-700 sm:max-w-36 dark:text-violet-300 dark:hover:text-violet-200"
+                className="h-7 max-w-28 gap-1 px-1.5 text-xs text-mode-design hover:text-mode-design sm:max-w-36"
                 aria-label={designSystemLabel ?? t.toolbar.designSystem}
                 onClick={onManageDesignSystems}
               >
