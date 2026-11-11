@@ -141,6 +141,7 @@ describe("ChatInput Design selection context", () => {
 
   it("uses distinct Plan and Design borders while Code remains neutral", () => {
     useConversationStore.getState().createConversation();
+    useConversationStore.getState().setWorkspaceMode("auto");
     const props = {
       input: "",
       onChange: vi.fn(),
@@ -175,9 +176,9 @@ describe("ChatInput Design selection context", () => {
       </TooltipProvider>,
     );
     expect(document.querySelector('[data-workspace-mode="plan"]')).toHaveClass(
-      "border-blue-500/50",
-      "focus-within:outline-blue-500/50",
-      "focus-within:ring-blue-500/15",
+      "border-mode-plan/50",
+      "focus-within:outline-mode-plan/50",
+      "focus-within:ring-mode-plan/15",
     );
     act(() => useConversationStore.getState().setWorkspaceMode("design"));
     rerender(
@@ -188,14 +189,15 @@ describe("ChatInput Design selection context", () => {
     expect(
       document.querySelector('[data-workspace-mode="design"]'),
     ).toHaveClass(
-      "border-violet-500/50",
-      "focus-within:outline-violet-500/50",
-      "focus-within:ring-violet-500/15",
+      "border-mode-design/50",
+      "focus-within:outline-mode-design/50",
+      "focus-within:ring-mode-design/15",
     );
   });
 
   it("keeps focus feedback on the outer composer while the textarea stays ring-free", async () => {
     useConversationStore.getState().createConversation();
+    useConversationStore.getState().setWorkspaceMode("auto");
     render(
       <TooltipProvider>
         <ChatInput

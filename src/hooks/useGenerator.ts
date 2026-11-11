@@ -90,6 +90,8 @@ import {
 } from "../lib/ai/conversation-context";
 import { PLAN_MODE_SYSTEM_SUFFIX } from "../lib/ai/plan-mode";
 import { buildRunSystemPromptSuffix } from "../lib/ai/run-system-prompt";
+import { artboardPromptContext } from "../lib/artboard/guidance";
+import { getConversationArtboard } from "../store/artboard";
 import { buildCustomSystemPromptSection } from "../lib/ai/custom-system-prompt";
 import { appendBufferedAssistantOutput } from "../lib/utils/stream-output";
 import { flushPendingSandpackFileChanges } from "../components/code-viewer/sandpack-file-changes";
@@ -1760,12 +1762,22 @@ export function useGenerator({
         .getState()
         .isAssetSearchConfigured();
 
+      const { createProjectImageSink } =
+        await import("../lib/tools/generate-image");
       const {
         customToolSet,
         combinedToolHandler,
         providerToolNames,
         runtimePlatform,
       } = await runtime.buildToolHandlers({
+        forkTools: {
+          conversationId: generatorConversationId,
+          imageSink: createProjectImageSink({
+            conversationId: generatorConversationId,
+            isCurrent: isCurrentCandidate,
+            syncGeneratorFiles: (files) => candidate?.setFiles(files),
+          }),
+        },
         features: {
           builtinSearch: isBuiltinSearch,
           webSearch: webConfigured,
@@ -3093,6 +3105,9 @@ export function useGenerator({
         workspaceMode: promptWorkspaceMode,
         designMode: DESIGN_MODE_SYSTEM_SUFFIX,
         designSystem: designSystemContext + projectDesignContext,
+        artboard: artboardPromptContext(
+          conversationId ? getConversationArtboard(conversationId) : null,
+        ),
       });
       const customSystemPromptSuffix =
         mode === "chat" || mode === "plan"

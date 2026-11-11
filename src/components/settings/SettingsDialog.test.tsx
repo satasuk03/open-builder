@@ -29,7 +29,6 @@ describe("SettingsDialog", () => {
   it("validates model settings before committing the draft", () => {
     expect(validateAISettingsDraft(aiDefaults, validationMessages)).toEqual({
       apiKey: "key required",
-      apiBaseUrl: "URL required",
     });
     expect(
       validateAISettingsDraft(
@@ -83,6 +82,7 @@ describe("SettingsDialog", () => {
     );
 
     await user.type(screen.getByLabelText("API Key"), "test-key");
+    await user.clear(screen.getByLabelText("API Base URL"));
     await user.type(
       screen.getByLabelText("API Base URL"),
       "https://api.example.com",

@@ -29,12 +29,19 @@ import {
 } from "@/components/ui/tooltip";
 import { buildProjectZip } from "@/lib/project-assets/archive";
 import { ProjectBuildDownload } from "./ProjectBuildDownload";
-import type { PreviewCaptureScope } from "../../lib/design/preview-runtime";
+import type {
+  ExportPixelRatio,
+  PreviewCaptureScope,
+} from "../../lib/design/preview-runtime";
 import type { ScreenshotMode } from "./PreviewScreenshot";
+import { artboardById, type ArtboardId } from "../../lib/artboard/presets";
+import { ArtboardPicker } from "./ArtboardPicker";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
@@ -83,6 +90,11 @@ interface ViewToolbarProps {
   designWorkspace?: {
     focused: boolean;
     actions: ReactNode;
+  };
+  artboard?: {
+    value: ArtboardId | null;
+    onChange: (id: ArtboardId | null) => void;
+    onExport?: (pixelRatio: ExportPixelRatio) => void;
   };
 }
 
@@ -193,8 +205,12 @@ export function ViewToolbar({
   onScreenshot,
   screenshotUnavailableReason,
   designWorkspace,
+  artboard,
 }: ViewToolbarProps) {
   const t = useT();
+  const activeArtboard = artboardById(artboard?.value);
+  const artboardActive = activeArtboard !== null;
+  const onArtboardExport = artboard?.onExport;
   return (
     <div
       inert={interactionLocked}
@@ -319,6 +335,31 @@ export function ViewToolbar({
                       <DropdownMenuItem onSelect={() => onScreenshot("region")}>
                         {t.screenshot.region}
                       </DropdownMenuItem>
+                      {activeArtboard && onArtboardExport && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="font-display text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                            {t.artboard.exportHeading}
+                          </DropdownMenuLabel>
+                          {([1, 2] as const).map((ratio) => (
+                            <DropdownMenuItem
+                              key={ratio}
+                              onSelect={() => onArtboardExport(ratio)}
+                              className="justify-between gap-6"
+                            >
+                              <span>
+                                {t.artboard.exportPng.replace(
+                                  "{ratio}",
+                                  String(ratio),
+                                )}
+                              </span>
+                              <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                                {`${activeArtboard.width * ratio}×${activeArtboard.height * ratio}`}
+                              </span>
+                            </DropdownMenuItem>
+                          ))}
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
@@ -371,38 +412,48 @@ export function ViewToolbar({
                     <RefreshCw size={15} />
                   </ToolbarIconButton>
                 )}
-                <div
-                  role="group"
-                  aria-label={t.toolbar.zoomLevel}
-                  className="flex h-8 items-center rounded-lg border border-border/70 p-0.5"
-                >
-                  <ToolbarIconButton
-                    onClick={() => onPreviewZoomOut?.()}
-                    label={t.toolbar.zoomOut}
-                    disabled={previewScale <= MIN_PREVIEW_SCALE}
-                    className="size-7 text-muted-foreground hover:text-foreground"
-                  >
-                    <Minus size={13} />
-                  </ToolbarIconButton>
-                  <output
+                {!artboardActive && (
+                  <div
+                    role="group"
                     aria-label={t.toolbar.zoomLevel}
-                    className="w-8 text-center font-mono text-[10px] font-medium tabular-nums text-muted-foreground"
+                    className="flex h-8 items-center rounded-lg border border-border/70 p-0.5"
                   >
-                    {Math.round(previewScale * 100)}
-                  </output>
-                  <ToolbarIconButton
-                    onClick={() => onPreviewZoomIn?.()}
-                    label={t.toolbar.zoomIn}
-                    disabled={previewScale >= MAX_PREVIEW_SCALE}
-                    className="size-7 text-muted-foreground hover:text-foreground"
-                  >
-                    <Plus size={13} />
-                  </ToolbarIconButton>
-                </div>
-                <PreviewDeviceSelector
-                  value={deviceSize}
-                  onChange={onDeviceSizeChange}
-                />
+                    <ToolbarIconButton
+                      onClick={() => onPreviewZoomOut?.()}
+                      label={t.toolbar.zoomOut}
+                      disabled={previewScale <= MIN_PREVIEW_SCALE}
+                      className="size-7 text-muted-foreground hover:text-foreground"
+                    >
+                      <Minus size={13} />
+                    </ToolbarIconButton>
+                    <output
+                      aria-label={t.toolbar.zoomLevel}
+                      className="w-8 text-center font-mono text-[10px] font-medium tabular-nums text-muted-foreground"
+                    >
+                      {Math.round(previewScale * 100)}
+                    </output>
+                    <ToolbarIconButton
+                      onClick={() => onPreviewZoomIn?.()}
+                      label={t.toolbar.zoomIn}
+                      disabled={previewScale >= MAX_PREVIEW_SCALE}
+                      className="size-7 text-muted-foreground hover:text-foreground"
+                    >
+                      <Plus size={13} />
+                    </ToolbarIconButton>
+                  </div>
+                )}
+                {artboard && (
+                  <ArtboardPicker
+                    value={artboard.value}
+                    onChange={artboard.onChange}
+                  />
+                )}
+                {!artboardActive && (
+                  <PreviewDeviceSelector
+                    value={deviceSize}
+                    onChange={onDeviceSizeChange}
+                  />
+                )}
               </div>
             )}
 

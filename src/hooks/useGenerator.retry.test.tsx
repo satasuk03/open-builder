@@ -1158,6 +1158,7 @@ describe("useGenerator retry Design policy", () => {
 
   it("retains the effective forced-skill union in supplemented history and Retry", async () => {
     const id = useConversationStore.getState().createConversation();
+    useConversationStore.getState().setWorkspaceMode("auto");
     const secondSkill = {
       ...ART_DIRECT_SKILL,
       id: "code-review",
@@ -1234,6 +1235,7 @@ describe("useGenerator retry Design policy", () => {
 
   it("drains updates submitted during Auto QA after restoring foreground mode", async () => {
     const id = useConversationStore.getState().createConversation();
+    useConversationStore.getState().setWorkspaceMode("auto");
     useConversationStore
       .getState()
       .setFiles({ "src/App.tsx": "export const App=1" });

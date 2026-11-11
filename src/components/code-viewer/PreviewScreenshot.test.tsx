@@ -12,6 +12,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useConversationStore } from "../../store/conversation";
 import { useSettingsStore } from "../../store/settings";
+import { PreviewRuntimeError } from "../../lib/design/preview-runtime";
 import { PreviewScreenshot } from "./PreviewScreenshot";
 
 const mocks = vi.hoisted(() => ({
@@ -105,6 +106,7 @@ describe("preview screenshot export", () => {
         expect.any(AbortSignal),
         mode,
         "screenshot",
+        undefined,
       );
       expect(mocks.save).toHaveBeenCalledExactlyOnceWith(
         pixels,
@@ -272,5 +274,84 @@ describe("preview screenshot export", () => {
     await userEvent.click(screen.getByRole("button", { name: "Retry" }));
     await screen.findByRole("img", { name: "Select screenshot area" });
     expect(mocks.capture).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("artboard PNG export", () => {
+  function pngWithSize(width: number, height: number) {
+    const bytes = new Uint8Array(33);
+    bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const view = new DataView(bytes.buffer);
+    view.setUint32(8, 13);
+    bytes.set([0x49, 0x48, 0x44, 0x52], 12);
+    view.setUint32(16, width);
+    view.setUint32(20, height);
+    return new Blob([bytes], { type: "image/png" });
+  }
+
+  const og2x = { width: 1200, height: 630, pixelRatio: 2 as const };
+
+  it("asks for an exact-size 2x capture and names the file by size and ratio", async () => {
+    const blob = pngWithSize(2400, 1260);
+    mocks.capture.mockResolvedValue({ blob });
+    const close = vi.fn();
+    render(
+      <PreviewScreenshot
+        conversationId={conversationId}
+        mode="viewport"
+        exportSize={og2x}
+        onClose={close}
+      />,
+    );
+    await waitFor(() => expect(close).toHaveBeenCalledOnce());
+    expect(mocks.capture).toHaveBeenCalledExactlyOnceWith(
+      conversationId,
+      expect.any(AbortSignal),
+      "viewport",
+      "screenshot",
+      { pixelRatio: 2, expectViewport: { width: 1200, height: 630 } },
+    );
+    expect(mocks.save).toHaveBeenCalledExactlyOnceWith(
+      blob,
+      expect.stringMatching(/-1200x630@2x-.*\.png$/),
+      expect.objectContaining({ mimeType: "image/png" }),
+      { signal: expect.any(AbortSignal) },
+    );
+  });
+
+  it("refuses to save a PNG whose header is not the artboard size times the ratio", async () => {
+    mocks.capture.mockResolvedValue({ blob: pngWithSize(1200, 630) });
+    const close = vi.fn();
+    render(
+      <PreviewScreenshot
+        conversationId={conversationId}
+        mode="viewport"
+        exportSize={og2x}
+        onClose={close}
+      />,
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The exported image was 1200×630 instead of 2400×1260, so it was not saved.",
+    );
+    expect(mocks.save).not.toHaveBeenCalled();
+    expect(close).not.toHaveBeenCalled();
+  });
+
+  it("explains a frame that is not at the artboard size", async () => {
+    mocks.capture.mockRejectedValue(
+      new PreviewRuntimeError("artboard_size_mismatch", "1200x500"),
+    );
+    render(
+      <PreviewScreenshot
+        conversationId={conversationId}
+        mode="viewport"
+        exportSize={og2x}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The artboard preview is not at its exact size",
+    );
+    expect(mocks.save).not.toHaveBeenCalled();
   });
 });

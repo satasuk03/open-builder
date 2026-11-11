@@ -431,4 +431,100 @@ describe("ViewToolbar preview availability", () => {
       screen.getByRole("button", { name: "Zoom out preview" }),
     ).toBeDisabled();
   });
+
+  it("switches between responsive devices and artboard presets", async () => {
+    const onChange = vi.fn();
+    const props = {
+      viewMode: "preview" as const,
+      onViewModeChange: vi.fn(),
+      deviceSize: "desktop" as const,
+      onDeviceSizeChange: vi.fn(),
+      files: { "index.html": "<body />" },
+    };
+    const { rerender } = render(
+      <TooltipProvider>
+        <ViewToolbar {...props} artboard={{ value: null, onChange }} />
+      </TooltipProvider>,
+    );
+    expect(
+      screen.getByRole("group", { name: "Preview screen size" }),
+    ).toBeVisible();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Artboard size" }),
+    );
+    await userEvent.click(
+      screen.getByRole("menuitemradio", { name: /Open Graph\s*1200×630/ }),
+    );
+    expect(onChange).toHaveBeenLastCalledWith("og");
+
+    rerender(
+      <TooltipProvider>
+        <ViewToolbar {...props} artboard={{ value: "story", onChange }} />
+      </TooltipProvider>,
+    );
+    expect(
+      screen.queryByRole("group", { name: "Preview screen size" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Zoom out preview" }),
+    ).toBeNull();
+    const trigger = screen.getByRole("button", {
+      name: "Artboard: Story 1080×1920",
+    });
+    await userEvent.click(trigger);
+    expect(
+      screen.getByRole("menuitemradio", { name: /Story/ }),
+    ).toHaveAttribute("aria-checked", "true");
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: /Responsive preview/ }),
+    );
+    expect(onChange).toHaveBeenLastCalledWith(null);
+  });
+
+  it("offers 1x and 2x artboard PNG exports only while an artboard is set", async () => {
+    const onExport = vi.fn();
+    const onScreenshot = vi.fn();
+    const props = {
+      viewMode: "preview" as const,
+      onViewModeChange: vi.fn(),
+      deviceSize: "desktop" as const,
+      onDeviceSizeChange: vi.fn(),
+      files: {},
+      onScreenshot,
+    };
+    const { rerender } = render(
+      <TooltipProvider>
+        <ViewToolbar
+          {...props}
+          artboard={{ value: null, onChange: vi.fn(), onExport }}
+        />
+      </TooltipProvider>,
+    );
+    const camera = screen.getByRole("button", { name: "Export screenshot" });
+    await userEvent.click(camera);
+    expect(screen.queryByRole("menuitem", { name: /PNG 1x/ })).toBeNull();
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Current viewport" }),
+    );
+    expect(onScreenshot).toHaveBeenLastCalledWith("viewport");
+
+    rerender(
+      <TooltipProvider>
+        <ViewToolbar
+          {...props}
+          artboard={{ value: "og", onChange: vi.fn(), onExport }}
+        />
+      </TooltipProvider>,
+    );
+    await userEvent.click(camera);
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: /PNG 1x\s*1200×630/ }),
+    );
+    expect(onExport).toHaveBeenLastCalledWith(1);
+    await userEvent.click(camera);
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: /PNG 2x\s*2400×1260/ }),
+    );
+    expect(onExport).toHaveBeenLastCalledWith(2);
+  });
 });

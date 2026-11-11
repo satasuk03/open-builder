@@ -1,14 +1,14 @@
+import type { ArtboardId } from "../lib/artboard/presets";
+
 export const zh = {
   app: {
     loading: "加载中...",
-    startBuilding: "开始构建你的项目",
+    startBuilding: "画布已就绪",
     startBuildingDesc:
-      "在左侧对话框中描述你想要创建的应用，AI 将为你生成完整的项目代码。",
+      "在左侧对话框中描述你想要的横幅或营销素材，设计会出现在这里，方便你查看和导出。",
     startBuildingDescTablet:
-      "在下方对话框中描述你想要创建的应用，AI 将为你生成完整的项目代码。",
-    resources: "Open Builder 资源",
-    officialWebsite: "官方网站",
-    openSourceProject: "开源项目",
+      "在下方对话框中描述你想要的横幅或营销素材，设计会出现在这里，方便你查看和导出。",
+    credit: "基于开源项目 Open Builder",
   },
   notifications: {
     label: "通知",
@@ -61,7 +61,7 @@ export const zh = {
     },
     model: {
       label: "模型名称",
-      hint: "AI 模型的名称，如 gpt-5.6-sol、deepseek-chat 等",
+      hint: "AI 模型的名称，如 anthropic/claude-sonnet-5.5、openai/gpt-6.1-sol 等",
       selectPlaceholder: "选择模型",
     },
     runtime: {
@@ -341,33 +341,33 @@ export const zh = {
     projectRoot: "（整个项目）",
   },
   empty: {
-    title: "从一个想法开始",
-    description: "告诉我应用给谁用、需要哪些功能，以及你喜欢的风格。",
-    referenceHint: "也可以上传参考截图，说明想保留或调整的部分。",
+    title: "今天设计什么？",
+    description: "告诉我这份素材用在哪里、要传达什么，以及你喜欢的风格。",
+    referenceHint: "也可以上传 Logo 或参考图，说明想保留或调整的部分。",
     suggestionsLabel: "快捷建议",
     suggestions: {
-      portfolio: {
-        title: "个人作品集",
-        description: "展示作品、个人介绍与联系方式",
+      launch: {
+        title: "新品发布横幅",
+        description: "为新版本准备 1200 x 630 的分享图",
         prompt:
-          "帮我创建一个设计师个人作品集，包含个人介绍、作品展示和联系方式。采用简洁的黑白风格，并适配手机。",
+          "帮我设计一张 1200 x 630 的 Open Graph 横幅，用于发布新品。包含醒目的标题、一行补充说明、产品展示区域，以及自信的双色配色。关键文字不要贴近边缘。",
       },
-      tasks: {
-        title: "任务管理",
-        description: "管理优先级，跟踪任务完成情况",
+      instagram: {
+        title: "Instagram 方形促销图",
+        description: "为季节性优惠准备 1080 x 1080 的图片",
         prompt:
-          "帮我创建一个个人任务管理应用，支持添加任务、设置优先级、标记完成和筛选。数据保存在本地，界面清晰简洁。",
+          "帮我设计一张 1080 x 1080 的 Instagram 促销图，用于季节性优惠。使用大号优惠数字、简短的行动号召、活泼的图形，以及在手机上清晰易读的暖色配色。",
       },
-      cafe: {
-        title: "咖啡店网站",
-        description: "用三个页面介绍菜单与门店",
+      linkedin: {
+        title: "LinkedIn 主页封面",
+        description: "为公司主页准备 1584 x 396 的封面",
         prompt:
-          "帮我创建一个咖啡店网站，包含首页、菜单和门店信息三个页面。采用温暖自然的风格，并适配手机。",
+          "帮我设计一张 1584 x 396 的 LinkedIn 公司主页封面。左侧放公司标语，右侧使用低调的品牌图案，配色沉稳专业。左下角预留头像遮挡的位置。",
       },
     },
   },
   chat: {
-    placeholder: "一句话描述你想要的应用...",
+    placeholder: "一句话描述你想要的横幅或素材...",
     instructions: {
       placeholder: "补充新的要求，当前任务会继续进行…",
       queued: "等待送达",
@@ -439,7 +439,7 @@ export const zh = {
     stopGeneration: "停止生成",
     send: "发送消息",
     processingImages: "正在处理图片…",
-    newApp: "新应用",
+    newApp: "新设计",
     planMode: {
       tooltip:
         "Plan 模式：AI 会先探索代码、提交方案给你审批，审批通过后才会写文件。",
@@ -486,9 +486,22 @@ export const zh = {
     settings: "设置",
   },
   warning: {
-    title: "需要配置 AI 模型",
-    desc: "请先配置 API Key 和模型设置才能开始使用",
     openSettings: "打开设置",
+  },
+  welcome: {
+    title: "来做点什么吧",
+    desc: "描述你想要的横幅、社交媒体图片或其他营销素材，Open Builder 会为你设计。粘贴 OpenRouter 密钥即可开始。",
+    keyLabel: "OpenRouter API 密钥",
+    save: "保存密钥",
+    saved: "密钥已保存。",
+    privacy: "密钥只保存在当前浏览器中，不会发送给我们。",
+    getKey: "前往 OpenRouter 获取密钥",
+    moreSettings: "打开完整设置",
+  },
+  imageResult: {
+    title: "已生成图片",
+    alt: "生成的图片 {path}",
+    missing: "已不在项目中",
   },
   sessions: {
     title: "会话列表",
@@ -1149,6 +1162,26 @@ export const zh = {
     unavailable: "截图需要受支持且已加载的预览。",
     exportFailed: "导出截图失败，请重试。",
   },
+  artboard: {
+    label: "画板",
+    menuTitle: "画板尺寸",
+    responsive: "自适应预览",
+    responsiveHint: "桌面、平板与手机",
+    presets: {
+      og: "Open Graph 分享图",
+      square: "方形帖子",
+      portrait: "竖版帖子",
+      story: "快拍",
+      landscape: "横版",
+      "x-header": "X 头图",
+      "linkedin-banner": "LinkedIn 横幅",
+    } satisfies Record<ArtboardId, string>,
+    exportPng: "PNG {ratio}x",
+    exportHeading: "导出画板",
+    sizeMismatch: "画板预览不是精确尺寸，无法导出。请关闭控制台后重试。",
+    wrongPngSize:
+      "导出的图片尺寸不对（{actual}，应为 {expected}），已取消保存。",
+  },
   annotation: {
     title: "批注预览",
     viewport: "当前画面",
@@ -1578,6 +1611,7 @@ export const zh = {
       read_files: "读取文件",
       read_attachment: "读取附件",
       generate_image: "生成图片",
+      set_artboard: "设置画板尺寸",
       import_generated_image: "将生成图片加入项目",
       write_file: "写入文件",
       patch_file: "修改文件",

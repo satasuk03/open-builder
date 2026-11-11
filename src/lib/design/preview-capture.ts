@@ -230,10 +230,11 @@ export function loadDesignCaptureRuntimeSource(): Promise<string> {
   captureRuntimePromise ??= Promise.all([
     import("html-to-image/dist/html-to-image.js?raw"),
     import("html2canvas/dist/html2canvas.min.js?raw"),
+    import("modern-screenshot/dist/index.js?raw"),
     import("./capture-canvas-adapter.js?raw"),
   ])
     .then(
-      ([module, html2canvas, adapter]) => `;(function () {
+      ([module, html2canvas, modernScreenshot, adapter]) => `;(function () {
   var captureExports = {};
   (function (exports, module, define) {
 ${module.default.replace(/\n?\/\/# sourceMappingURL=.*$/m, "")}
@@ -242,8 +243,12 @@ ${module.default.replace(/\n?\/\/# sourceMappingURL=.*$/m, "")}
   (function (exports, module, define) {
 ${html2canvas.default.replace(/\n?\/\/# sourceMappingURL=.*$/m, "")}
   })(canvasModule.exports, canvasModule, undefined);
+  var screenshotExports = {};
+  (function (exports, module, define) {
+${modernScreenshot.default.replace(/\n?\/\/# sourceMappingURL=.*$/m, "")}
+  })(screenshotExports, { exports: screenshotExports }, undefined);
 ${adapter.default.replace(/^export default /m, "")}
-  installCaptureCanvasAdapter(captureExports, canvasModule.exports);
+  installCaptureCanvasAdapter(captureExports, canvasModule.exports, screenshotExports);
   globalThis[${JSON.stringify(DESIGN_CAPTURE_RUNTIME_GLOBAL)}] = captureExports;
   if (typeof globalThis.dispatchEvent === "function") {
     globalThis.dispatchEvent(new Event("open-builder:capture-runtime-ready"));

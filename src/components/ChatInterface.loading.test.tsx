@@ -107,9 +107,7 @@ describe("ChatInterface generation loading", () => {
       />,
     );
 
-    expect(
-      screen.getByText("AI Model Configuration Required"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Let's make something")).toBeInTheDocument();
 
     rerender(
       <ChatInterface
@@ -123,9 +121,7 @@ describe("ChatInterface generation loading", () => {
       />,
     );
 
-    expect(
-      screen.queryByText("AI Model Configuration Required"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Let's make something")).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(
       "The selected CLI was not found",
     );

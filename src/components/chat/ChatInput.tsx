@@ -471,12 +471,12 @@ export function ChatInput({
       >
         {designSelection && activeId && (
           <div
-            className="mb-2 flex items-center gap-2 rounded-lg border border-violet-500/25 bg-violet-500/5 px-2.5 py-2 text-xs"
+            className="mb-2 flex items-center gap-2 rounded-lg border border-mode-design/25 bg-mode-design/5 px-2.5 py-2 text-xs"
             aria-label={t.designSelection.contextLabel}
           >
             <MousePointer2
               size={14}
-              className="shrink-0 text-violet-500"
+              className="shrink-0 text-mode-design"
               aria-hidden="true"
             />
             <span className="min-w-0 flex-1 truncate">
@@ -585,9 +585,9 @@ export function ChatInput({
             className={cn(
               "overflow-hidden rounded-lg border bg-background outline-none transition-[border-color,box-shadow,outline-color] focus-within:outline-solid focus-within:outline-1 focus-within:outline-offset-0 focus-within:ring-2 focus-within:ring-offset-0",
               workspaceMode === "plan"
-                ? "border-blue-500/50 focus-within:border-blue-500/60 focus-within:outline-blue-500/50 focus-within:ring-blue-500/15 dark:border-blue-400/50 dark:focus-within:border-blue-400/60 dark:focus-within:outline-blue-400/50 dark:focus-within:ring-blue-400/15"
+                ? "border-mode-plan/50 focus-within:border-mode-plan/60 focus-within:outline-mode-plan/50 focus-within:ring-mode-plan/15"
                 : workspaceMode === "design"
-                  ? "border-violet-500/50 focus-within:border-violet-500/60 focus-within:outline-violet-500/50 focus-within:ring-violet-500/15 dark:border-violet-400/50 dark:focus-within:border-violet-400/60 dark:focus-within:outline-violet-400/50 dark:focus-within:ring-violet-400/15"
+                  ? "border-mode-design/50 focus-within:border-mode-design/60 focus-within:outline-mode-design/50 focus-within:ring-mode-design/15"
                   : "border-input focus-within:border-ring/60 focus-within:outline-ring/50 focus-within:ring-ring/15",
             )}
           >

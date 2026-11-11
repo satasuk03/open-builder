@@ -1,6 +1,7 @@
 import {
   PreviewRuntimeError,
   withPreviewCaptureLock,
+  type AnnotationCaptureOptions,
   type PreviewCaptureScope,
 } from "../design/preview-runtime";
 
@@ -10,6 +11,7 @@ export function capturePreviewImage(
   signal: AbortSignal,
   scope: PreviewCaptureScope = "viewport",
   owner: "annotation" | "screenshot" = "annotation",
+  options?: AnnotationCaptureOptions,
 ) {
   return withPreviewCaptureLock({
     conversationId,
@@ -43,6 +45,7 @@ export function capturePreviewImage(
         generation,
         captureSignal,
         scope,
+        options,
       );
       assertCurrent();
       if (capture.generation !== generation) {

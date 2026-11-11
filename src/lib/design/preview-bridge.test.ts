@@ -2149,3 +2149,338 @@ describe("long-page rendering requests", () => {
     },
   );
 });
+
+describe("artboard export pixel ratio", () => {
+  function pngBlob(width: number, height: number) {
+    const png = fallbackImageDataUrl("image/png", width, height);
+    return new Blob(
+      [Uint8Array.from(atob(png.split(",")[1]), (ch) => ch.charCodeAt(0))],
+      { type: "image/png" },
+    );
+  }
+
+  function annotationFixture(
+    image: { width: number; height: number },
+    pixelRatio?: unknown,
+  ) {
+    const expected = {
+      generation: "artboard",
+      nonce: "artboard-nonce",
+      requestId: "artboard-request",
+      viewportName: "desktop" as const,
+      viewportWidth: 1200,
+      viewportHeight: 630,
+      currentViewport: true,
+      scope: "viewport" as const,
+      output: "annotation" as const,
+    };
+    const message = {
+      generation: expected.generation,
+      nonce: expected.nonce,
+      requestId: expected.requestId,
+      type: "open-builder:design-bridge-annotation-result",
+      version: 2,
+      payload: {
+        blob: pngBlob(image.width, image.height),
+        ...(pixelRatio === undefined ? {} : { pixelRatio }),
+        capture: {
+          scope: "viewport",
+          region: { x: 0, y: 0, width: 1200, height: 630 },
+          scale: 1,
+        },
+        viewport: {
+          name: "desktop",
+          width: 1200,
+          height: 630,
+          capturedHeight: 630,
+          fullHeight: 630,
+          truncated: false,
+        },
+        semanticSnapshot: {
+          route: "/",
+          viewport: { width: 1200, height: 630, devicePixelRatio: 1 },
+          document: {
+            scrollWidth: 1200,
+            scrollHeight: 630,
+            horizontalOverflow: false,
+            fonts: "ready",
+          },
+          elements: [],
+        },
+      },
+    };
+    return { expected, message };
+  }
+
+  it("accepts a 2x annotation only when the host asked for exactly 2x", async () => {
+    vi.stubGlobal("Blob", NodeBlob);
+    try {
+      const { expected, message } = annotationFixture(
+        { width: 2400, height: 1260 },
+        2,
+      );
+      expect(
+        await parseDesignBridgeAnnotationResponse(message, {
+          ...expected,
+          pixelRatio: 2,
+        }),
+      ).toMatchObject({
+        ok: true,
+        result: {
+          capture: { scale: 1, region: { width: 1200, height: 630 } },
+        },
+      });
+      expect(
+        await parseDesignBridgeAnnotationResponse(message, expected),
+      ).toBeNull();
+      expect(
+        await parseDesignBridgeAnnotationResponse(message, {
+          ...expected,
+          pixelRatio: 1,
+        }),
+      ).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it.each([
+    ["a 1x response to a 2x request", { width: 2400, height: 1260 }, 1],
+    ["a response without a ratio", { width: 2400, height: 1260 }, undefined],
+    ["an unsupported ratio", { width: 3600, height: 1890 }, 3],
+    ["a 1x-sized image", { width: 1200, height: 630 }, 2],
+    ["an image one pixel too wide", { width: 2401, height: 1260 }, 2],
+    ["an image one pixel too short", { width: 2400, height: 1259 }, 2],
+  ])("rejects %s", async (_label, image, pixelRatio) => {
+    vi.stubGlobal("Blob", NodeBlob);
+    try {
+      const { expected, message } = annotationFixture(image, pixelRatio);
+      expect(
+        await parseDesignBridgeAnnotationResponse(message, {
+          ...expected,
+          pixelRatio: 2,
+        }),
+      ).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("keeps a 1x annotation valid with or without an explicit ratio", async () => {
+    vi.stubGlobal("Blob", NodeBlob);
+    try {
+      for (const pixelRatio of [undefined, 1]) {
+        const { expected, message } = annotationFixture(
+          { width: 1200, height: 630 },
+          pixelRatio,
+        );
+        expect(
+          await parseDesignBridgeAnnotationResponse(message, expected),
+        ).toMatchObject({ ok: true });
+        expect(
+          await parseDesignBridgeAnnotationResponse(message, {
+            ...expected,
+            pixelRatio: 2,
+          }),
+        ).toBeNull();
+      }
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("rejects evidence that carries or expects a pixel ratio", () => {
+    const expected = {
+      generation: "evidence",
+      nonce: "evidence-nonce",
+      requestId: "evidence-request",
+      viewportName: "desktop" as const,
+      viewportWidth: 1200,
+      viewportHeight: 630,
+      currentViewport: true,
+      scope: "viewport" as const,
+    };
+    const payload = {
+      dataUrl: webpDataUrl(1200, 630),
+      capture: {
+        scope: "viewport",
+        region: { x: 0, y: 0, width: 1200, height: 630 },
+        scale: 1,
+      },
+      viewport: {
+        name: "desktop",
+        width: 1200,
+        height: 630,
+        capturedHeight: 630,
+        fullHeight: 630,
+        truncated: false,
+      },
+      semanticSnapshot: {
+        route: "/",
+        viewport: { width: 1200, height: 630, devicePixelRatio: 1 },
+        document: {
+          scrollWidth: 1200,
+          scrollHeight: 630,
+          horizontalOverflow: false,
+          fonts: "ready",
+        },
+        elements: [],
+      },
+    };
+    const message = {
+      generation: expected.generation,
+      nonce: expected.nonce,
+      requestId: expected.requestId,
+      type: "open-builder:design-bridge-capture-result",
+      version: 2,
+      payload,
+    };
+    expect(parseDesignBridgeCaptureResponse(message, expected)).toMatchObject({
+      ok: true,
+    });
+    for (const pixelRatio of [1, 2]) {
+      expect(
+        parseDesignBridgeCaptureResponse(
+          { ...message, payload: { ...payload, pixelRatio } },
+          expected,
+        ),
+      ).toBeNull();
+      expect(
+        parseDesignBridgeCaptureResponse(message, {
+          ...expected,
+          pixelRatio: pixelRatio as 1 | 2,
+        }),
+      ).toBeNull();
+    }
+  });
+
+  async function runBridgeCapture(
+    request: Record<string, unknown>,
+    generation: string,
+  ) {
+    const iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+    const frame = iframe.contentWindow as Window & typeof globalThis;
+    Object.defineProperty(frame, "parent", {
+      configurable: true,
+      value: frame,
+    });
+    Object.defineProperty(frame, "innerWidth", { value: 1200 });
+    Object.defineProperty(frame, "innerHeight", { value: 630 });
+    Object.defineProperty(frame.document.documentElement, "scrollHeight", {
+      value: 630,
+    });
+    Object.defineProperty(frame.document.documentElement, "scrollWidth", {
+      value: 1200,
+    });
+    const replies: Record<string, unknown>[] = [];
+    frame.postMessage = ((message: Record<string, unknown>) => {
+      if (
+        /capture-result|annotation-result|capture-error/.test(
+          String(message.type),
+        )
+      )
+        replies.push(message);
+    }) as typeof frame.postMessage;
+    const toCanvas = vi.fn(async (_node, options) => ({
+      width: options.canvasWidth,
+      height: options.canvasHeight,
+      toDataURL: () => webpDataUrl(options.canvasWidth, options.canvasHeight),
+      toBlob: (resolve: (blob: Blob) => void) =>
+        resolve(pngBlob(options.canvasWidth, options.canvasHeight)),
+    }));
+    Object.defineProperty(frame, DESIGN_CAPTURE_RUNTIME_GLOBAL, {
+      value: { toCanvas },
+    });
+    frame.eval(
+      injectDesignBridge(
+        { "index.html": "<body></body>" },
+        "static",
+        true,
+        "runtime",
+        generation,
+      ).files[DESIGN_BRIDGE_VIRTUAL_PATH],
+    );
+    frame.dispatchEvent(
+      new frame.MessageEvent("message", {
+        source: frame,
+        origin: "https://builder.test",
+        data: {
+          ...request,
+          generation,
+          type: "open-builder:design-bridge-capture",
+          version: 2,
+          viewport: { name: "desktop", width: 1200, height: 630 },
+        },
+      }),
+    );
+    await vi
+      .waitFor(() => expect(replies.length).toBeGreaterThan(0), {
+        timeout: 2000,
+      })
+      .catch(() => undefined);
+    iframe.remove();
+    return { replies, toCanvas };
+  }
+
+  it("renders a 2x annotation at twice the canvas size and reports its ratio", async () => {
+    vi.stubGlobal("Blob", NodeBlob);
+    try {
+      const expectation = {
+        generation: "artboard-2x",
+        nonce: "artboard-2x-nonce",
+        requestId: "artboard-2x-request",
+        currentViewport: true,
+        scope: "viewport" as const,
+        output: "annotation" as const,
+        pixelRatio: 2 as const,
+        viewportName: "desktop" as const,
+        viewportWidth: 1200,
+        viewportHeight: 630,
+      };
+      const { replies, toCanvas } = await runBridgeCapture(
+        expectation,
+        expectation.generation,
+      );
+      expect(toCanvas).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          scale: 2,
+          pixelRatio: 1,
+          canvasWidth: 2400,
+          canvasHeight: 1260,
+        }),
+      );
+      expect(replies).toHaveLength(1);
+      expect(
+        await parseDesignBridgeAnnotationResponse(replies[0], expectation),
+      ).toMatchObject({
+        ok: true,
+        result: { capture: { scale: 1 } },
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("ignores an evidence request that carries a pixel ratio", async () => {
+    vi.stubGlobal("Blob", NodeBlob);
+    try {
+      const { replies, toCanvas } = await runBridgeCapture(
+        {
+          nonce: "evidence-2x-nonce",
+          requestId: "evidence-2x-request",
+          currentViewport: true,
+          scope: "viewport",
+          output: "evidence",
+          pixelRatio: 2,
+        },
+        "evidence-2x",
+      );
+      expect(toCanvas).not.toHaveBeenCalled();
+      expect(replies).toHaveLength(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});

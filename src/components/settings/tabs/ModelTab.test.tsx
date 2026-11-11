@@ -8,7 +8,10 @@ import { useSettingsStore } from "../../../store/settings";
 import { aiDefaults } from "../../../store/settings/ai";
 import { systemDefaults } from "../../../store/settings/system";
 import { ModelTab } from "./ModelTab";
-import { DEFAULT_OPENAI_MODEL } from "../../../lib/ai/provider-config";
+import {
+  OPENROUTER_BASE_URL,
+  OPENROUTER_DEFAULT_CHAT_MODEL,
+} from "../../../lib/ai/openrouter";
 
 const defaultEnsureLocalCliHostObservation =
   useSettingsStore.getState().ensureLocalCliHostObservation;
@@ -99,7 +102,7 @@ describe("ModelTab local-agent capability", () => {
     );
   });
 
-  it("sets the OpenAI-family default when the API type changes", async () => {
+  it("sets the OpenRouter default when the API type changes to OpenAI Compatible", async () => {
     const user = userEvent.setup();
     const setFormData = vi.fn();
     useSettingsStore.setState({
@@ -127,8 +130,8 @@ describe("ModelTab local-agent capability", () => {
     expect(setFormData).toHaveBeenCalledWith(
       expect.objectContaining({
         apiType: "openai-compatible",
-        apiBaseUrl: "http://localhost:11434",
-        model: DEFAULT_OPENAI_MODEL,
+        apiBaseUrl: OPENROUTER_BASE_URL,
+        model: OPENROUTER_DEFAULT_CHAT_MODEL,
       }),
     );
   });

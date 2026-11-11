@@ -252,7 +252,9 @@ test("shows mode-aware composer focus and creates from the mobile starter librar
     messages: 0,
   });
 
-  const textarea = page.getByPlaceholder("Describe the app you want...");
+  const textarea = page.getByPlaceholder(
+    "Describe the banner or asset you want...",
+  );
   await textarea.focus();
   const composer = page.locator('[data-workspace-mode="auto"]');
   const readFocusStyle = () =>

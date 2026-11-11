@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  BriefcaseBusiness,
-  CheckCheck,
-  Coffee,
-  LayoutTemplate,
-} from "lucide-react";
+import { LayoutTemplate, PanelTop, Rocket, Square } from "lucide-react";
 import { useT } from "../../i18n";
 import { useProjectTemplateLibraryUi } from "../../store/project-template-library-ui";
 
@@ -16,16 +11,16 @@ export function EmptyState({ onSelectSuggestion }: EmptyStateProps) {
   const t = useT();
   const openLibrary = useProjectTemplateLibraryUi((state) => state.openLibrary);
   const suggestions = [
-    { Icon: BriefcaseBusiness, ...t.empty.suggestions.portfolio },
-    { Icon: CheckCheck, ...t.empty.suggestions.tasks },
-    { Icon: Coffee, ...t.empty.suggestions.cafe },
+    { Icon: Rocket, ...t.empty.suggestions.launch },
+    { Icon: Square, ...t.empty.suggestions.instagram },
+    { Icon: PanelTop, ...t.empty.suggestions.linkedin },
   ];
 
   return (
     <div className="flex flex-1 flex-col justify-center py-8">
       <div className="mx-auto w-full max-w-xs space-y-4">
         <div className="space-y-2">
-          <h2 className="text-base font-semibold text-balance">
+          <h2 className="font-display text-xl font-semibold text-balance">
             {t.empty.title}
           </h2>
           <p className="text-sm leading-6 text-muted-foreground text-pretty">
@@ -47,7 +42,7 @@ export function EmptyState({ onSelectSuggestion }: EmptyStateProps) {
             >
               <Icon
                 size={16}
-                className="mt-0.5 text-muted-foreground"
+                className="mt-0.5 text-primary"
                 aria-hidden="true"
               />
               <span className="min-w-0 space-y-1">

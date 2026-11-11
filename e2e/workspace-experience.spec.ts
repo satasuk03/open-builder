@@ -45,17 +45,19 @@ for (const { theme, language, width } of [
     });
     await suggestions
       .getByRole("button", {
-        name: chinese ? /个人作品集/ : /Personal portfolio/,
+        name: chinese ? /新品发布横幅/ : /Product launch banner/,
       })
       .click();
     const input = page.getByPlaceholder(
-      chinese ? "一句话描述你想要的应用..." : "Describe the app you want...",
+      chinese
+        ? "一句话描述你想要的横幅或素材..."
+        : "Describe the banner or asset you want...",
     );
     await expect(input).toBeFocused();
     await expect(input).toHaveValue(
       chinese
-        ? /包含个人介绍、作品展示和联系方式/
-        : /a personal introduction, a project showcase, and contact details/,
+        ? /1200 x 630 的 Open Graph 横幅/
+        : /1200 x 630 Open Graph banner/,
     );
     const state = await page.evaluate(async () => {
       const { useConversationStore } =
@@ -64,7 +66,7 @@ for (const { theme, language, width } of [
       return store.conversations[store.activeId!];
     });
     expect(state.messages).toHaveLength(0);
-    expect(state.workspaceMode).toBe("auto");
+    expect(state.workspaceMode).toBe("design");
     await page
       .getByRole("button", {
         name: chinese ? "打开项目起始库" : "Open project starters",

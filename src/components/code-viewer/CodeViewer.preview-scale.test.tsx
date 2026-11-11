@@ -313,6 +313,10 @@ import {
   resolvePreviewIframeHeight,
   resolvePreviewScale,
 } from "../CodeViewer";
+import {
+  setConversationArtboard,
+  useArtboardStore,
+} from "../../store/artboard";
 
 const baseProps = {
   files: { "src/App.tsx": "export default function App() {}" },
@@ -421,6 +425,7 @@ describe("CodeViewer preview scale", () => {
   });
 
   afterEach(() => {
+    useArtboardStore.setState({ byConversation: {} });
     vi.useRealTimers();
     sandpackProviderError = null;
     vi.unstubAllGlobals();
@@ -1576,6 +1581,33 @@ describe("CodeViewer preview scale", () => {
     });
     expect(previewSurface.style.width).toBe("375px");
     expect(previewSurface.style.height).toBe("667px");
+  });
+
+  it("renders an artboard at its exact CSS size, fit-scaled on screen, and unzoomed", async () => {
+    const user = userEvent.setup();
+    render(<CodeViewer conversationId="conversation-a" {...baseProps} />);
+    await user.click(screen.getByRole("button", { name: "Zoom out" }));
+    expect(screen.getByTestId("preview-scale")).toHaveTextContent("90");
+
+    act(() => setConversationArtboard("conversation-a", "og"));
+
+    const preview = screen.getByTestId("sandpack-preview");
+    const previewSurface = preview.parentElement?.parentElement as HTMLElement;
+    const previewFrame = previewSurface.parentElement as HTMLElement;
+    await waitFor(() => {
+      expect(previewSurface.style.transform).toBe("scale(0.64)");
+    });
+    expect(previewSurface.style.width).toBe("1200px");
+    expect(previewSurface.style.height).toBe("630px");
+    expect(previewFrame.style.width).toBe("768px");
+    expect(previewFrame.style.height).toBe("403.2px");
+    expect(preview.style.getPropertyValue("--ob-preview-scale")).toBe("1");
+
+    act(() => setConversationArtboard("conversation-a", null));
+    await waitFor(() => {
+      expect(previewSurface.style.transform).toBe("");
+    });
+    expect(previewFrame.style.width).toBe("100%");
   });
 
   it("initializes from the project preference and keeps manual device changes local", async () => {

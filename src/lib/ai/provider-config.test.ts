@@ -6,6 +6,7 @@ import {
   MODEL_LIST_LIMITS,
   resolveBaseURL,
 } from "./provider-config";
+import { OPENROUTER_DEFAULT_CHAT_MODEL } from "./openrouter";
 
 describe("provider config helpers", () => {
   afterEach(() => {
@@ -21,21 +22,22 @@ describe("provider config helpers", () => {
     );
   });
 
-  it("defaults only OpenAI-family API providers to the unified model", () => {
+  it("defaults OpenAI to its model and OpenAI-compatible to OpenRouter's", () => {
     expect(defaultModelForApiType("openai")).toBe(DEFAULT_OPENAI_MODEL);
     expect(defaultModelForApiType("openai-compatible")).toBe(
-      DEFAULT_OPENAI_MODEL,
+      OPENROUTER_DEFAULT_CHAT_MODEL,
     );
     expect(defaultModelForApiType("anthropic")).toBe("");
     expect(defaultModelForApiType("google")).toBe("");
   });
 
-  it("bounds and deduplicates OpenAI-compatible model ids", async () => {
+  it("sorts, then bounds and deduplicates OpenAI-compatible model ids", async () => {
     const data = Array.from(
       { length: MODEL_LIST_LIMITS.maxModels + 20 },
       (_, i) => ({ id: `model-${i}` }),
     );
     data.push({ id: "model-1" });
+    data.push({ id: "anthropic/claude-sonnet-5.5" });
     data.push({ id: "x".repeat(MODEL_LIST_LIMITS.maxModelIdChars + 1) });
 
     vi.stubGlobal(
@@ -54,6 +56,7 @@ describe("provider config helpers", () => {
     );
 
     expect(models).toHaveLength(MODEL_LIST_LIMITS.maxModels);
+    expect(models[0]).toBe("anthropic/claude-sonnet-5.5");
     expect(new Set(models).size).toBe(models.length);
     expect(models).not.toContain(
       "x".repeat(MODEL_LIST_LIMITS.maxModelIdChars + 1),

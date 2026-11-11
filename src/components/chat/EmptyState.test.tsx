@@ -31,22 +31,20 @@ describe("EmptyState", () => {
     ).toBeVisible();
     expect(screen.getAllByRole("button")).toHaveLength(4);
     await user.click(
-      screen.getByRole("button", { name: /Personal portfolio/ }),
+      screen.getByRole("button", { name: /Product launch banner/ }),
     );
     expect(onSelectSuggestion).toHaveBeenCalledWith(
-      expect.stringContaining(
-        "a personal introduction, a project showcase, and contact details",
-      ),
-    );
-    await user.click(screen.getByRole("button", { name: /Task manager/ }));
-    expect(onSelectSuggestion).toHaveBeenLastCalledWith(
-      expect.stringContaining("Save data locally"),
+      expect.stringContaining("1200 x 630 Open Graph banner"),
     );
     await user.click(
-      screen.getByRole("button", { name: /Coffee shop website/ }),
+      screen.getByRole("button", { name: /Instagram square promo/ }),
     );
     expect(onSelectSuggestion).toHaveBeenLastCalledWith(
-      expect.stringContaining("three pages"),
+      expect.stringContaining("1080 x 1080 Instagram promo"),
+    );
+    await user.click(screen.getByRole("button", { name: /LinkedIn header/ }));
+    expect(onSelectSuggestion).toHaveBeenLastCalledWith(
+      expect.stringContaining("1584 x 396 LinkedIn"),
     );
   });
 

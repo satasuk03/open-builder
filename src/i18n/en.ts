@@ -3,14 +3,12 @@ import type { zh } from "./zh";
 export const en: typeof zh = {
   app: {
     loading: "Loading...",
-    startBuilding: "Start Building Your Project",
+    startBuilding: "Your canvas is waiting",
     startBuildingDesc:
-      "Describe the app you want to create in the left chat box, and AI will generate complete project code for you.",
+      "Describe a banner or marketing asset in the chat on the left. Your design will appear here, ready to review and export.",
     startBuildingDescTablet:
-      "Describe the app you want to create in the chat panel below, and AI will generate complete project code for you.",
-    resources: "Open Builder resources",
-    officialWebsite: "Official website",
-    openSourceProject: "Open-source project",
+      "Describe a banner or marketing asset in the chat below. Your design will appear here, ready to review and export.",
+    credit: "Based on the open-source Open Builder project",
   },
   notifications: {
     label: "Notifications",
@@ -64,7 +62,7 @@ export const en: typeof zh = {
     },
     model: {
       label: "Model Name",
-      hint: "AI model name, e.g. gpt-5.6-sol, deepseek-chat",
+      hint: "Model id, e.g. anthropic/claude-sonnet-5.5, openai/gpt-6.1-sol",
       selectPlaceholder: "Select a model",
     },
     runtime: {
@@ -367,35 +365,35 @@ export const en: typeof zh = {
     projectRoot: "(entire project)",
   },
   empty: {
-    title: "Start with an idea",
+    title: "What are we designing?",
     description:
-      "Tell me who your app is for, what it should do, and the style you like.",
+      "Tell me what the asset is for, where it will appear, and the look you want.",
     referenceHint:
-      "You can also upload a reference screenshot and describe what to keep or change.",
+      "You can also upload a logo or a reference image and describe what to keep or change.",
     suggestionsLabel: "Quick suggestions",
     suggestions: {
-      portfolio: {
-        title: "Personal portfolio",
-        description: "Showcase your work, bio, and contact details",
+      launch: {
+        title: "Product launch banner",
+        description: "A 1200 x 630 Open Graph image for a new release",
         prompt:
-          "Create a designer portfolio with a personal introduction, a project showcase, and contact details. Use a simple black and white style and make it work on mobile.",
+          "Design a 1200 x 630 Open Graph banner announcing a product launch. Use a bold headline, a short supporting line, a clear product visual area, and a confident two-colour palette. Keep key text away from the edges.",
       },
-      tasks: {
-        title: "Task manager",
-        description: "Set priorities and track completed tasks",
+      instagram: {
+        title: "Instagram square promo",
+        description: "A 1080 x 1080 post for a seasonal offer",
         prompt:
-          "Create a personal task manager with task creation, priorities, completion tracking, and filters. Save data locally and keep the interface clear and simple.",
+          "Design a 1080 x 1080 Instagram promo post for a seasonal sale. Use a large offer number, a short call to action, playful shapes, and a warm, eye-catching palette that stays legible on a phone.",
       },
-      cafe: {
-        title: "Coffee shop website",
-        description: "Introduce your menu and location in three pages",
+      linkedin: {
+        title: "LinkedIn header",
+        description: "A 1584 x 396 cover for a company page",
         prompt:
-          "Create a coffee shop website with three pages: home, menu, and location. Use a warm, natural style and make it work on mobile.",
+          "Design a 1584 x 396 LinkedIn company page header. Use a clean layout with the company tagline on the left, a subtle brand pattern on the right, and a calm, professional palette. Leave space where the profile photo overlaps the bottom left.",
       },
     },
   },
   chat: {
-    placeholder: "Describe the app you want...",
+    placeholder: "Describe the banner or asset you want...",
     instructions: {
       placeholder: "Add a requirement while the task continues…",
       queued: "Waiting to send",
@@ -474,7 +472,7 @@ export const en: typeof zh = {
     stopGeneration: "Stop",
     send: "Send",
     processingImages: "Processing images…",
-    newApp: "New App",
+    newApp: "New design",
     planMode: {
       tooltip:
         "Plan Mode: AI will explore the code and propose a plan for your approval before writing any files.",
@@ -524,9 +522,22 @@ export const en: typeof zh = {
     settings: "Settings",
   },
   warning: {
-    title: "AI Model Configuration Required",
-    desc: "Please configure your API Key and model settings to get started",
     openSettings: "Open Settings",
+  },
+  welcome: {
+    title: "Let's make something",
+    desc: "Describe a banner, social post or any marketing asset and Open Builder designs it for you. Paste an OpenRouter key to start.",
+    keyLabel: "OpenRouter API key",
+    save: "Save key",
+    saved: "Key saved.",
+    privacy: "Your key is stored only in this browser. It is never sent to us.",
+    getKey: "Get a key from OpenRouter",
+    moreSettings: "Open full settings",
+  },
+  imageResult: {
+    title: "Generated image",
+    alt: "Generated image {path}",
+    missing: "No longer in the project",
   },
   sessions: {
     title: "Sessions",
@@ -1222,6 +1233,27 @@ export const en: typeof zh = {
     unavailable: "Screenshots need a supported, loaded preview.",
     exportFailed: "Could not export the screenshot. Try again.",
   },
+  artboard: {
+    label: "Artboard",
+    menuTitle: "Artboard size",
+    responsive: "Responsive preview",
+    responsiveHint: "Desktop, tablet and phone",
+    presets: {
+      og: "Open Graph",
+      square: "Square post",
+      portrait: "Portrait post",
+      story: "Story",
+      landscape: "Landscape",
+      "x-header": "X header",
+      "linkedin-banner": "LinkedIn banner",
+    },
+    exportPng: "PNG {ratio}x",
+    exportHeading: "Export artboard",
+    sizeMismatch:
+      "The artboard preview is not at its exact size, so it cannot be exported. Close the console and try again.",
+    wrongPngSize:
+      "The exported image was {actual} instead of {expected}, so it was not saved.",
+  },
   annotation: {
     title: "Annotate preview",
     viewport: "Current viewport",
@@ -1673,6 +1705,7 @@ export const en: typeof zh = {
       read_files: "Read Files",
       read_attachment: "Read Attachment",
       generate_image: "Generate Image",
+      set_artboard: "Set Artboard",
       import_generated_image: "Add Generated Image to Project",
       write_file: "Write File",
       patch_file: "Patch File",
