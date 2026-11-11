@@ -537,6 +537,11 @@ describe("conversation store", () => {
     expect(
       useConversationStore.getState().conversations[autoConversation]
         .workspaceMode,
+    ).toBe("design");
+    useConversationStore.getState().setWorkspaceMode("auto");
+    expect(
+      useConversationStore.getState().conversations[autoConversation]
+        .workspaceMode,
     ).toBe("auto");
     expect(
       useConversationStore.getState().conversations[designConversation]

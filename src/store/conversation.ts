@@ -556,7 +556,7 @@ export const useConversationStore = create<ConversationState>()(
             previewMode: "sandpack",
             defaultPreviewView: "desktop",
             isProjectInitialized: false,
-            workspaceMode: "auto",
+            workspaceMode: "design",
             createdAt: Date.now(),
             updatedAt: Date.now(),
           };
