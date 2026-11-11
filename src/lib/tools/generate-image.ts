@@ -101,7 +101,8 @@ export function createProjectImageSink(deps: {
 }): ProjectImageSink {
   return {
     async commit({ bytes, stem, signal }) {
-      // Loaded lazily so the static tool catalog does not pull in the stores.
+      // Imported lazily: the conversation store already depends on the tool
+      // catalog, which imports this module, so a static import would cycle.
       const [{ commitGeneratedImage }, { useConversationStore }] =
         await Promise.all([
           import("../project-assets/commit-generated-image"),
