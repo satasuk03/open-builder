@@ -1611,6 +1611,7 @@ export const zh = {
       read_files: "读取文件",
       read_attachment: "读取附件",
       generate_image: "生成图片",
+      set_artboard: "设置画板尺寸",
       import_generated_image: "将生成图片加入项目",
       write_file: "写入文件",
       patch_file: "修改文件",

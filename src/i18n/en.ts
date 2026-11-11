@@ -1705,6 +1705,7 @@ export const en: typeof zh = {
       read_files: "Read Files",
       read_attachment: "Read Attachment",
       generate_image: "Generate Image",
+      set_artboard: "Set Artboard",
       import_generated_image: "Add Generated Image to Project",
       write_file: "Write File",
       patch_file: "Patch File",
