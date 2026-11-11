@@ -29,14 +29,19 @@ import {
 } from "@/components/ui/tooltip";
 import { buildProjectZip } from "@/lib/project-assets/archive";
 import { ProjectBuildDownload } from "./ProjectBuildDownload";
-import type { PreviewCaptureScope } from "../../lib/design/preview-runtime";
+import type {
+  ExportPixelRatio,
+  PreviewCaptureScope,
+} from "../../lib/design/preview-runtime";
 import type { ScreenshotMode } from "./PreviewScreenshot";
-import type { ArtboardId } from "../../lib/artboard/presets";
+import { artboardById, type ArtboardId } from "../../lib/artboard/presets";
 import { ArtboardPicker } from "./ArtboardPicker";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
@@ -89,6 +94,7 @@ interface ViewToolbarProps {
   artboard?: {
     value: ArtboardId | null;
     onChange: (id: ArtboardId | null) => void;
+    onExport?: (pixelRatio: ExportPixelRatio) => void;
   };
 }
 
@@ -202,7 +208,9 @@ export function ViewToolbar({
   artboard,
 }: ViewToolbarProps) {
   const t = useT();
-  const artboardActive = !!artboard?.value;
+  const activeArtboard = artboardById(artboard?.value);
+  const artboardActive = activeArtboard !== null;
+  const onArtboardExport = artboard?.onExport;
   return (
     <div
       inert={interactionLocked}
@@ -327,6 +335,31 @@ export function ViewToolbar({
                       <DropdownMenuItem onSelect={() => onScreenshot("region")}>
                         {t.screenshot.region}
                       </DropdownMenuItem>
+                      {activeArtboard && onArtboardExport && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="font-display text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                            {t.artboard.exportHeading}
+                          </DropdownMenuLabel>
+                          {([1, 2] as const).map((ratio) => (
+                            <DropdownMenuItem
+                              key={ratio}
+                              onSelect={() => onArtboardExport(ratio)}
+                              className="justify-between gap-6"
+                            >
+                              <span>
+                                {t.artboard.exportPng.replace(
+                                  "{ratio}",
+                                  String(ratio),
+                                )}
+                              </span>
+                              <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                                {`${activeArtboard.width * ratio}×${activeArtboard.height * ratio}`}
+                              </span>
+                            </DropdownMenuItem>
+                          ))}
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}

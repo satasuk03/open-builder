@@ -47,6 +47,7 @@ describe("annotation capture", () => {
         "first-generation",
         expect.any(AbortSignal),
         "full-page",
+        undefined,
       );
       expect(runtime.capture).not.toHaveBeenCalled();
       expect(isPreviewCaptureBusy("screenshot")).toBe(false);
@@ -67,6 +68,7 @@ describe("annotation capture", () => {
         "first-generation",
         expect.any(AbortSignal),
         "viewport",
+        undefined,
       );
       expect(isPreviewCaptureBusy("annotation")).toBe(false);
     } finally {
@@ -89,6 +91,35 @@ describe("annotation capture", () => {
         "first-generation",
         expect.any(AbortSignal),
         "full-page",
+        undefined,
+      );
+    } finally {
+      dispose();
+    }
+  });
+
+  it("forwards artboard export options to the capture seam", async () => {
+    const { runtime, result } = fixture();
+    const dispose = registerPreviewRuntime("artboard-export", runtime);
+    const options = {
+      pixelRatio: 2 as const,
+      expectViewport: { width: 1200, height: 630 },
+    };
+    try {
+      await expect(
+        capturePreviewImage(
+          "artboard-export",
+          new AbortController().signal,
+          "viewport",
+          "screenshot",
+          options,
+        ),
+      ).resolves.toBe(result);
+      expect(runtime.captureAnnotation).toHaveBeenCalledWith(
+        "first-generation",
+        expect.any(AbortSignal),
+        "viewport",
+        options,
       );
     } finally {
       dispose();

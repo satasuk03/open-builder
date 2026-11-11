@@ -16,6 +16,7 @@ import {
   PROTOTYPE_PREVIEW_ROUTE_MAX_LENGTH,
   type DesignReviewViewportName,
   type PrototypePreviewTarget,
+  type ExportPixelRatio,
   type PreviewCaptureGeometry,
   type PreviewCaptureOptions,
 } from "./preview-runtime";
@@ -109,7 +110,7 @@ export function designBridgeRuntimeRevision(
   generation: string,
   captureRuntimeAvailable: boolean,
 ): string {
-  return `${generation}:11:${captureRuntimeAvailable ? "capture" : "selection"}`;
+  return `${generation}:12:${captureRuntimeAvailable ? "capture" : "selection"}`;
 }
 
 export interface DesignPreviewSemanticElement {
@@ -202,6 +203,8 @@ export interface DesignBridgeCaptureExpectation extends PreviewCaptureOptions {
   viewportHeight: number;
   target?: PrototypePreviewTarget;
   currentViewport?: boolean;
+  /** Annotation output only. The response must carry exactly this ratio. */
+  pixelRatio?: ExportPixelRatio;
 }
 
 export interface DesignBridgeNavigationExpectation {
@@ -935,6 +938,8 @@ function previewBridgeClientSource(
         ? { x: Math.max(0, window.scrollX), y: Math.max(0, window.scrollY), width: actualWidth, height: actualHeight }
         : { x: 0, y: 0, width: fullWidth, height: fullHeight };
       var scale = annotation ? 1 : Math.min(1, 2000 / region.width, CAPTURE_MAX_HEIGHT / region.height, Math.sqrt(CAPTURE_MAX_PIXELS / (region.width * region.height)));
+      var pixelRatio = annotation && data.pixelRatio === 2 ? 2 : 1;
+      var renderScale = scale * pixelRatio;
       var snapshot = semanticSnapshot(data.target, actualWidth, actualHeight);
       snapshot.document.scrollWidth = fullWidth;
       snapshot.document.scrollHeight = fullHeight;
@@ -942,7 +947,7 @@ function previewBridgeClientSource(
         signal: controller.signal,
         output: annotation ? "annotation" : "evidence",
         region: region,
-        scale: scale,
+        scale: renderScale,
         windowWidth: actualWidth,
         windowHeight: actualHeight,
         cacheBust: true,
@@ -950,8 +955,8 @@ function previewBridgeClientSource(
         skipAutoScale: true,
         width: region.width,
         height: region.height,
-        canvasWidth: Math.max(1, Math.floor(region.width * scale)),
-        canvasHeight: Math.max(1, Math.floor(region.height * scale)),
+        canvasWidth: Math.max(1, Math.floor(region.width * renderScale)),
+        canvasHeight: Math.max(1, Math.floor(region.height * renderScale)),
         style: {
           width: actualWidth + "px",
           height: fullHeight + "px",
@@ -1012,6 +1017,7 @@ function previewBridgeClientSource(
           semanticSnapshot: snapshot
         })
       };
+      if (annotation) resultMessage.payload.pixelRatio = pixelRatio;
       if (!sendCapture(resultMessage, origin)) throw new Error("Preview capture response exceeded its size limit.");
     } finally {
       if (canvas) { canvas.width = 0; canvas.height = 0; }
@@ -1067,6 +1073,7 @@ function previewBridgeClientSource(
       if (data.target !== undefined && !safePrototypeTarget(data.target)) return;
       if (data.scope !== undefined && data.scope !== "viewport" && data.scope !== "full-page") return;
       if (data.output !== undefined && data.output !== "evidence" && data.output !== "annotation") return;
+      if (data.pixelRatio !== undefined && (data.output !== "annotation" || (data.pixelRatio !== 1 && data.pixelRatio !== 2))) return;
       capture(data, eventOrigin).catch(function (error) { captureError(data, eventOrigin, error); });
       return;
     }
@@ -1846,6 +1853,7 @@ function validateCapturePayload(
   expected: DesignBridgeCaptureExpectation,
   image: ReturnType<typeof captureBytesMetadata>,
   annotation: boolean,
+  pixelRatio: ExportPixelRatio = 1,
 ) {
   if (
     !image ||
@@ -1921,8 +1929,10 @@ function validateCapturePayload(
       fullHeight !== Math.max(height, semanticSnapshot.document.scrollHeight) ||
       (annotation && scale !== 1) ||
       capturedHeight !== region.height ||
-      image.width !== Math.max(1, Math.floor(region.width * scale)) ||
-      image.height !== Math.max(1, Math.floor(region.height * scale))
+      image.width !==
+        Math.max(1, Math.floor(region.width * scale * pixelRatio)) ||
+      image.height !==
+        Math.max(1, Math.floor(region.height * scale * pixelRatio))
     )
       return null;
     if (
@@ -1967,7 +1977,8 @@ export function parseDesignBridgeCaptureResponse(
   value: unknown,
   expected: DesignBridgeCaptureExpectation,
 ): DesignBridgeCaptureResponse | null {
-  if (expected.output === "annotation") return null;
+  if (expected.output === "annotation" || expected.pixelRatio !== undefined)
+    return null;
   const raw = captureEnvelope(value, expected);
   if (!raw) return null;
   if (raw.type === "open-builder:design-bridge-capture-error")
@@ -1983,7 +1994,11 @@ export function parseDesignBridgeCaptureResponse(
   )
     return null;
   const payload = raw.payload as Record<string, unknown>;
-  if (typeof payload.dataUrl !== "string" || payload.blob !== undefined)
+  if (
+    typeof payload.dataUrl !== "string" ||
+    payload.blob !== undefined ||
+    payload.pixelRatio !== undefined
+  )
     return null;
   const image = captureImageMetadata(payload.dataUrl);
   const fields = validateCapturePayload(payload, expected, image, false);
@@ -2023,6 +2038,8 @@ export async function parseDesignBridgeAnnotationResponse(
     payload.dataUrl !== undefined
   )
     return null;
+  const pixelRatio = expected.pixelRatio ?? 1;
+  if ((payload.pixelRatio ?? 1) !== pixelRatio) return null;
   const size = jsonByteLength({
     ...raw,
     payload: { ...payload, blob: undefined },
@@ -2034,7 +2051,13 @@ export async function parseDesignBridgeAnnotationResponse(
       new Uint8Array(await payload.blob.arrayBuffer()),
     );
     if (!image || image.mimeType !== "image/png") return null;
-    const fields = validateCapturePayload(payload, expected, image, true);
+    const fields = validateCapturePayload(
+      payload,
+      expected,
+      image,
+      true,
+      pixelRatio,
+    );
     if (!fields || !fields.capture) return null;
     return {
       ok: true,

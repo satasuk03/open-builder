@@ -40,6 +40,18 @@ export interface PreviewCaptureOptions {
   output?: "evidence" | "annotation";
 }
 
+/**
+ * Export-only upsampling for annotation output. Separate from
+ * `PreviewCaptureGeometry.scale`, which stays the evidence downscale in (0, 1].
+ */
+export type ExportPixelRatio = 1 | 2;
+
+export interface AnnotationCaptureOptions {
+  pixelRatio?: ExportPixelRatio;
+  /** The capture fails unless the live preview iframe is exactly this size. */
+  expectViewport?: { width: number; height: number };
+}
+
 export interface PreviewCaptureGeometry {
   scope: PreviewCaptureScope;
   region: { x: number; y: number; width: number; height: number };
@@ -173,7 +185,8 @@ export type PreviewRuntimeErrorCode =
   | "capture_busy"
   | "stale_generation"
   | "invalid_target"
-  | "target_identity_mismatch";
+  | "target_identity_mismatch"
+  | "artboard_size_mismatch";
 
 export class PreviewRuntimeError extends Error {
   constructor(
@@ -227,6 +240,7 @@ export interface PreviewRuntimeAdapter {
     generation: string,
     signal: AbortSignal,
     scope: PreviewCaptureScope,
+    options?: AnnotationCaptureOptions,
   ) => Promise<DesignBridgeAnnotationCaptureResult>;
   /** Capture only the requested viewports, preserving their order. */
   capture: (

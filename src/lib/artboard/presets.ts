@@ -15,9 +15,6 @@ export const ARTBOARD_IDS = ARTBOARD_PRESETS.map((preset) => preset.id) as [
   ...ArtboardId[],
 ];
 
-export type ArtboardPixelRatio = 1 | 2;
-export const ARTBOARD_PIXEL_RATIOS: readonly ArtboardPixelRatio[] = [1, 2];
-
 export function artboardById(id: unknown): ArtboardPreset | null {
   return ARTBOARD_PRESETS.find((preset) => preset.id === id) ?? null;
 }

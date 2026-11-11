@@ -12,7 +12,11 @@ import {
   captureConversationIdentity,
   isConversationIdentityCurrent,
 } from "../../lib/conversation/branches";
-import { PreviewRuntimeError } from "../../lib/design/preview-runtime";
+import {
+  PreviewRuntimeError,
+  type ExportPixelRatio,
+} from "../../lib/design/preview-runtime";
+import { readPngSize } from "../../lib/artboard/png-size";
 import { capturePreviewImage } from "../../lib/preview-annotation/capture";
 import {
   annotationCrop,
@@ -27,30 +31,55 @@ import { Button } from "../ui/button";
 
 export type ScreenshotMode = "viewport" | "full-page" | "region";
 
+export interface ArtboardExportSize {
+  width: number;
+  height: number;
+  pixelRatio: ExportPixelRatio;
+}
+
+class PngSizeMismatch extends Error {
+  constructor(
+    readonly actual: string,
+    readonly expected: string,
+  ) {
+    super(`PNG is ${actual}, expected ${expected}.`);
+  }
+}
+
 const PNG_FORMAT = {
   mimeType: "image/png",
   extension: "png",
   description: "PNG",
 };
 
-function screenshotName(title: string, mode: ScreenshotMode) {
+function screenshotName(
+  title: string,
+  mode: ScreenshotMode,
+  exportSize?: ArtboardExportSize,
+) {
   const name =
     title
       .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-")
       .trim()
       .slice(0, 80) || "project";
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  return `${name}-${mode}-${timestamp}.png`;
+  const label = exportSize
+    ? `${exportSize.width}x${exportSize.height}@${exportSize.pixelRatio}x`
+    : mode;
+  return `${name}-${label}-${timestamp}.png`;
 }
 
 /** Each mount captures once; region mode edits only the frozen viewport image. */
 export function PreviewScreenshot({
   conversationId,
   mode,
+  exportSize,
   onClose,
 }: {
   conversationId: string;
   mode: ScreenshotMode;
+  /** Exact artboard export: the PNG must be width*pixelRatio by height*pixelRatio. */
+  exportSize?: ArtboardExportSize;
   onClose: () => void;
 }) {
   const t = useT();
@@ -76,11 +105,15 @@ export function PreviewScreenshot({
       useConversationStore.getState().conversations[conversationId];
     return conversation ? captureConversationIdentity(conversation) : undefined;
   });
+  const [artboardExport] = useState(() =>
+    exportSize && mode === "viewport" ? exportSize : undefined,
+  );
   const [fileName] = useState(() =>
     screenshotName(
       useConversationStore.getState().conversations[conversationId]?.title ??
         "project",
       mode,
+      artboardExport,
     ),
   );
 
@@ -129,9 +162,36 @@ export function PreviewScreenshot({
           controller.signal,
           mode === "full-page" ? "full-page" : "viewport",
           "screenshot",
+          artboardExport && {
+            pixelRatio: artboardExport.pixelRatio,
+            expectViewport: {
+              width: artboardExport.width,
+              height: artboardExport.height,
+            },
+          },
         );
         controller.signal.throwIfAborted();
         captured = true;
+        if (artboardExport) {
+          const expected = {
+            width: artboardExport.width * artboardExport.pixelRatio,
+            height: artboardExport.height * artboardExport.pixelRatio,
+          };
+          const size = readPngSize(
+            new Uint8Array(await capture.blob.slice(0, 24).arrayBuffer()),
+          );
+          controller.signal.throwIfAborted();
+          if (
+            !size ||
+            size.width !== expected.width ||
+            size.height !== expected.height
+          ) {
+            throw new PngSizeMismatch(
+              size ? `${size.width}×${size.height}` : "?",
+              `${expected.width}×${expected.height}`,
+            );
+          }
+        }
         if (mode !== "region") {
           setSaving(true);
           await saveBlob(capture.blob, fileName, PNG_FORMAT, {
@@ -153,15 +213,22 @@ export function PreviewScreenshot({
         const currentLabels = getT();
         setCaptureFailed(true);
         setError(
-          reason instanceof PreviewRuntimeError &&
-            reason.code === "capture_busy"
-            ? currentLabels.annotation.captureBusy
+          reason instanceof PngSizeMismatch
+            ? currentLabels.artboard.wrongPngSize
+                .replace("{actual}", reason.actual)
+                .replace("{expected}", reason.expected)
             : reason instanceof PreviewRuntimeError &&
-                reason.code === "stale_generation"
-              ? currentLabels.annotation.captureChanged
-              : captured
-                ? currentLabels.screenshot.exportFailed
-                : currentLabels.annotation.captureFailed,
+                reason.code === "artboard_size_mismatch"
+              ? currentLabels.artboard.sizeMismatch
+              : reason instanceof PreviewRuntimeError &&
+                  reason.code === "capture_busy"
+                ? currentLabels.annotation.captureBusy
+                : reason instanceof PreviewRuntimeError &&
+                    reason.code === "stale_generation"
+                  ? currentLabels.annotation.captureChanged
+                  : captured
+                    ? currentLabels.screenshot.exportFailed
+                    : currentLabels.annotation.captureFailed,
         );
       } finally {
         if (!controller.signal.aborted) setSaving(false);
@@ -173,7 +240,7 @@ export function PreviewScreenshot({
       if (imageUrl) URL.revokeObjectURL(imageUrl);
       if (session.current === controller) session.current = null;
     };
-  }, [attempt, conversationId, fileName, identity, mode]);
+  }, [artboardExport, attempt, conversationId, fileName, identity, mode]);
 
   useLayoutEffect(() => {
     const element = stage.current;
@@ -255,7 +322,12 @@ export function PreviewScreenshot({
     >
       <div className="flex shrink-0 items-center gap-2 border-b px-4 py-3 text-sm font-medium">
         <Camera size={16} aria-hidden="true" />
-        {labels.title}
+        {artboardExport ? t.artboard.exportHeading : labels.title}
+        {artboardExport && (
+          <span className="ml-1 rounded-md bg-accent px-1.5 py-0.5 font-mono text-[11px] font-normal tabular-nums text-accent-foreground">
+            {`${artboardExport.width * artboardExport.pixelRatio}×${artboardExport.height * artboardExport.pixelRatio} · @${artboardExport.pixelRatio}x`}
+          </span>
+        )}
       </div>
       {mode === "region" && (
         <p className="shrink-0 px-4 py-2 text-xs text-muted-foreground">
