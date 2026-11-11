@@ -367,7 +367,7 @@ export const zh = {
     },
   },
   chat: {
-    placeholder: "一句话描述你想要的应用...",
+    placeholder: "一句话描述你想要的横幅或素材...",
     instructions: {
       placeholder: "补充新的要求，当前任务会继续进行…",
       queued: "等待送达",
@@ -439,7 +439,7 @@ export const zh = {
     stopGeneration: "停止生成",
     send: "发送消息",
     processingImages: "正在处理图片…",
-    newApp: "新应用",
+    newApp: "新设计",
     planMode: {
       tooltip:
         "Plan 模式：AI 会先探索代码、提交方案给你审批，审批通过后才会写文件。",

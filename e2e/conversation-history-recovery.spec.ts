@@ -83,7 +83,7 @@ test("reopens history with null tool arguments and continues rendering messages"
     page.getByText("Error: failed to parse arguments", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByPlaceholder("Describe the app you want..."),
+    page.getByPlaceholder("Describe the banner or asset you want..."),
   ).toBeEditable();
   const before = await page.evaluate(async () => {
     const url = "/src/store/conversation.ts";

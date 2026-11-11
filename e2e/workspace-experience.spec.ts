@@ -49,7 +49,7 @@ for (const { theme, language, width } of [
       })
       .click();
     const input = page.getByPlaceholder(
-      chinese ? "一句话描述你想要的应用..." : "Describe the app you want...",
+      chinese ? "一句话描述你想要的横幅或素材..." : "Describe the banner or asset you want...",
     );
     await expect(input).toBeFocused();
     await expect(input).toHaveValue(

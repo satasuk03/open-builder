@@ -156,7 +156,7 @@ test("delivers an update after the current tool without restarting the task", as
   try {
     await seedProject(page, model.url);
     await page
-      .getByPlaceholder("Describe the app you want...")
+      .getByPlaceholder("Describe the banner or asset you want...")
       .fill("Inspect current files, then respond.");
     await page.getByRole("button", { name: "Send", exact: true }).click();
     await expect.poll(() => model.requests.length).toBe(1);
@@ -218,7 +218,7 @@ test("stops the transport and keeps unsent updates cancelled across a new task",
   try {
     await seedProject(page, model.url);
     await page
-      .getByPlaceholder("Describe the app you want...")
+      .getByPlaceholder("Describe the banner or asset you want...")
       .fill("Inspect the files.");
     await page.getByRole("button", { name: "Send", exact: true }).click();
     await expect.poll(() => model.requests.length).toBe(1);
@@ -236,7 +236,7 @@ test("stops the transport and keeps unsent updates cancelled across a new task",
     await expect.poll(model.closed).toBe(true);
     expect(model.requests).toHaveLength(1);
     await page
-      .getByPlaceholder("Describe the app you want...")
+      .getByPlaceholder("Describe the banner or asset you want...")
       .fill("Start a fresh task.");
     await page.getByRole("button", { name: "Send", exact: true }).click();
     await expect(

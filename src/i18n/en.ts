@@ -393,7 +393,7 @@ export const en: typeof zh = {
     },
   },
   chat: {
-    placeholder: "Describe the app you want...",
+    placeholder: "Describe the banner or asset you want...",
     instructions: {
       placeholder: "Add a requirement while the task continues…",
       queued: "Waiting to send",
@@ -472,7 +472,7 @@ export const en: typeof zh = {
     stopGeneration: "Stop",
     send: "Send",
     processingImages: "Processing images…",
-    newApp: "New App",
+    newApp: "New design",
     planMode: {
       tooltip:
         "Plan Mode: AI will explore the code and propose a plan for your approval before writing any files.",

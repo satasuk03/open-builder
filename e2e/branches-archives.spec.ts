@@ -326,7 +326,7 @@ test("shows distinct subagent status and a ten-pixel stop icon with themed scrol
   });
   try {
     await page
-      .getByPlaceholder("Describe the app you want...")
+      .getByPlaceholder("Describe the banner or asset you want...")
       .fill("Inspect the project");
     await page.getByRole("button", { name: "Send", exact: true }).click();
     const stop = page.getByRole("button", { name: "Stop", exact: true });

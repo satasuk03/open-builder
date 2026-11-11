@@ -168,7 +168,7 @@ test("annotates the frozen scrolled viewport and appends a cropped PNG to the ex
   test.setTimeout(150_000);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await seed(page);
-  const chat = page.getByPlaceholder("Describe the app you want...");
+  const chat = page.getByPlaceholder("Describe the banner or asset you want...");
   await chat.fill("Please fix these details");
   await page.locator('input[type="file"][accept^="text/"]').setInputFiles({
     name: "notes.txt",
