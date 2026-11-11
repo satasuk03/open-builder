@@ -1,5 +1,9 @@
 // Kept as raw ES2017 source: the desktop Parcel parser does not support newer syntax.
-export default function installCaptureCanvasAdapter(runtime, html2canvas) {
+export default function installCaptureCanvasAdapter(
+  runtime,
+  html2canvas,
+  modernScreenshot,
+) {
   const toSvg = runtime.toSvg;
   function abortReason(signal) {
     return signal.reason !== null && signal.reason !== undefined
@@ -125,7 +129,7 @@ export default function installCaptureCanvasAdapter(runtime, html2canvas) {
       !Number.isInteger(height) ||
       width < 1 ||
       height < 1 ||
-      (options.output !== "annotation" && width * height > 6000000) ||
+      width * height > 6000000 ||
       options.pixelRatio !== 1
     ) {
       throw new Error("Screenshot canvas dimensions are invalid.");
@@ -164,7 +168,78 @@ export default function installCaptureCanvasAdapter(runtime, html2canvas) {
     }
   };
 
+  // html2canvas drops an <svg> that is itself absolutely positioned, and
+  // html-to-image applies the page's bare `svg {}` rules to its own wrapper,
+  // shifting the whole image. User-facing PNGs use modern-screenshot, which
+  // measured pixel-equal to Chromium on scripts/capture-fidelity fixtures.
+  function annotationCanvas(node, options) {
+    const {
+      canvasWidth: width,
+      canvasHeight: height,
+      region,
+      signal,
+    } = options;
+    if (
+      !region ||
+      !Number.isInteger(width) ||
+      !Number.isInteger(height) ||
+      width < 1 ||
+      height < 1
+    ) {
+      return Promise.reject(
+        new Error("Screenshot canvas dimensions are invalid."),
+      );
+    }
+    if (signal && signal.aborted) return Promise.reject(abortReason(signal));
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const timer = setTimeout(
+        () => finish(new Error("Screenshot document rendering timed out.")),
+        15000,
+      );
+      function abort() {
+        finish(abortReason(signal));
+      }
+      function finish(error, canvas) {
+        // The library cannot be cancelled; discard a late or rejected canvas.
+        if (canvas && (settled || error)) {
+          canvas.width = 0;
+          canvas.height = 0;
+        }
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (signal) signal.removeEventListener("abort", abort);
+        if (error) reject(error);
+        else resolve(canvas);
+      }
+      if (signal) signal.addEventListener("abort", abort, { once: true });
+      Promise.resolve()
+        .then(() =>
+          modernScreenshot.domToCanvas(node, {
+            width: region.width,
+            height: region.height,
+            scale: options.scale,
+            style: options.style,
+            filter: options.filter,
+            timeout: 15000,
+          }),
+        )
+        .then(
+          (canvas) =>
+            canvas.width === width && canvas.height === height
+              ? finish(null, canvas)
+              : finish(
+                  new Error("Screenshot canvas allocation failed."),
+                  canvas,
+                ),
+          (error) => finish(screenshotError("rendering", error)),
+        );
+    });
+  }
+
   runtime.toCanvas = async (node, options) => {
+    if (options.output === "annotation") return annotationCanvas(node, options);
     if (typeof html2canvas !== "function" || !options.region) {
       return fallbackCanvas(node, options);
     }
