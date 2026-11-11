@@ -1228,6 +1228,27 @@ export const en: typeof zh = {
     unavailable: "Screenshots need a supported, loaded preview.",
     exportFailed: "Could not export the screenshot. Try again.",
   },
+  artboard: {
+    label: "Artboard",
+    menuTitle: "Artboard size",
+    responsive: "Responsive preview",
+    responsiveHint: "Desktop, tablet and phone",
+    presets: {
+      og: "Open Graph",
+      square: "Square post",
+      portrait: "Portrait post",
+      story: "Story",
+      landscape: "Landscape",
+      "x-header": "X header",
+      "linkedin-banner": "LinkedIn banner",
+    },
+    exportPng: "PNG {ratio}x",
+    exportHeading: "Export artboard",
+    sizeMismatch:
+      "The artboard preview is not at its exact size, so it cannot be exported. Close the console and try again.",
+    wrongPngSize:
+      "The exported image was {actual} instead of {expected}, so it was not saved.",
+  },
   annotation: {
     title: "Annotate preview",
     viewport: "Current viewport",

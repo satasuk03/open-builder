@@ -44,6 +44,10 @@ import {
 import { assessProjectRuntime } from "../lib/project-runtime/capabilities";
 import type { ProjectFileChangeGuard } from "./code-viewer/sandpack-file-changes";
 import { ViewToolbar } from "./code-viewer/ViewToolbar";
+import {
+  setConversationArtboard,
+  useConversationArtboard,
+} from "../store/artboard";
 import { PreviewAnnotation } from "./code-viewer/PreviewAnnotation";
 import {
   PreviewScreenshot,
@@ -667,17 +671,19 @@ export function CodeViewer({
     setPageSourceMissing(false);
   }, [workspaceKey]);
 
-  const deviceDimensions = captureViewport
-    ? { width: captureViewport.width, height: captureViewport.height }
+  const artboard = useConversationArtboard(conversationId);
+  const frameViewport = captureViewport ?? (canvasMode ? null : artboard);
+  const deviceDimensions = frameViewport
+    ? { width: frameViewport.width, height: frameViewport.height }
     : canvasMode && deviceSize === "desktop"
       ? { width: 1440, height: 900 }
       : deviceSize === "tablet"
         ? { width: 768, height: 1024 }
         : { width: 375, height: 667 };
   const fixedPreview =
-    captureViewport !== null || deviceSize !== "desktop" || canvasMode;
+    frameViewport !== null || deviceSize !== "desktop" || canvasMode;
   const previewScale = resolvePreviewScale({
-    captureActive: captureViewport !== null,
+    captureActive: frameViewport !== null,
     requestedScale: canvasMode ? 1 : requestedScale,
   });
 
@@ -698,7 +704,7 @@ export function CodeViewer({
   }, [normalizedDefaultPreviewView]);
 
   useEffect(() => {
-    if (!captureViewport) return;
+    if (!frameViewport) return;
     const host = previewHostRef.current;
     if (!host) return;
     const update = () => {
@@ -722,7 +728,7 @@ export function CodeViewer({
     observer.observe(host);
     return () => observer.disconnect();
   }, [
-    captureViewport,
+    frameViewport,
     deviceDimensions.height,
     deviceDimensions.width,
     viewMode,
@@ -3001,7 +3007,7 @@ export function CodeViewer({
       ? requestedCurrentFile
       : (Object.keys(previewFiles)[0] ?? requestedCurrentFile);
   const sandpackCurrentFile = `/${effectiveCurrentFile}`;
-  const previewFrameScale = captureViewport ? captureFitScale : 1;
+  const previewFrameScale = frameViewport ? captureFitScale : 1;
   const previewHostOverflowClass = fixedPreview
     ? "overflow-auto p-4"
     : "overflow-hidden";
@@ -3015,7 +3021,7 @@ export function CodeViewer({
     ? {
         width: deviceDimensions.width,
         height: deviceDimensions.height,
-        ...(captureViewport
+        ...(frameViewport
           ? {
               transform: `scale(${previewFrameScale})`,
               transformOrigin: "top left",
@@ -3105,6 +3111,10 @@ export function CodeViewer({
             ? t.screenshot.unavailable
             : undefined
         }
+        artboard={{
+          value: artboard?.id ?? null,
+          onChange: (id) => setConversationArtboard(conversationId, id),
+        }}
         designSelectionSupported={bridgeInjection.supported}
         designSelectionActive={designSelectionActive}
         onToggleDesignSelection={() =>
@@ -3326,7 +3336,7 @@ export function CodeViewer({
                             "grid grid-rows-3 h-full",
                             fixedPreview &&
                               "overflow-hidden rounded-lg bg-background shadow-lg",
-                            captureViewport &&
+                            frameViewport &&
                               "absolute left-0 top-0 rounded-none shadow-none transition-none",
                           )}
                           style={previewSurfaceStyle}
@@ -3345,7 +3355,7 @@ export function CodeViewer({
                                 previewScale !== 1 && "preview-content-scaled",
                               )}
                               style={previewContentStyle}
-                              showNavigator={!captureViewport && !canvasMode}
+                              showNavigator={!frameViewport && !canvasMode}
                               showOpenInCodeSandbox={false}
                               showRefreshButton={false}
                               showRestartButton={false}
