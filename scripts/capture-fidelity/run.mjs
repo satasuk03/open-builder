@@ -1,7 +1,8 @@
 // Measures how closely PNG exports match what Chromium paints for banner fixtures.
 //
 //   node scripts/capture-fidelity/run.mjs --out <dir> [--mode app|harness]
-//     [--renderer <name>] [--base http://localhost:5184] [--only a,b]
+//     [--renderer runtime|runtime-evidence|html-to-image|html-to-image-body|
+//       modern-screenshot|snapdom] [--base http://localhost:5184] [--only a,b]
 //     [--presets og,story,landscape] [--ratios 1,2]
 //
 // Needs the dev server at --base. "app" exports through the Camera menu of the
