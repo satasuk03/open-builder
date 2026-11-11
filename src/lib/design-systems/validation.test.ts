@@ -58,10 +58,10 @@ function declaredTokenNames(css: string): string[] {
 }
 
 describe("Design system validation", () => {
-  it("validates all 36 pinned bundled packages and their digests", async () => {
-    expect(BUNDLED_DESIGN_SYSTEMS).toHaveLength(36);
+  it("validates all 37 pinned bundled packages and their digests", async () => {
+    expect(BUNDLED_DESIGN_SYSTEMS).toHaveLength(37);
     expect(new Set(BUNDLED_DESIGN_SYSTEMS.map((entry) => entry.id)).size).toBe(
-      36,
+      37,
     );
     const runtimeCatalog = JSON.parse(await fetchLocalText("catalog.json"));
     expect(runtimeCatalog.map((entry: { id: string }) => entry.id)).toEqual(
@@ -92,7 +92,7 @@ describe("Design system validation", () => {
   });
 
   it("loads each curated source as a local package and applies its verified reference", async () => {
-    const additions = BUNDLED_DESIGN_SYSTEMS.slice(12);
+    const additions = BUNDLED_DESIGN_SYSTEMS.slice(13);
     expect(additions).toHaveLength(24);
     for (const entry of additions) {
       const pkg = await loadBundledDesignSystem(entry.id, fetchLocalText);

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "open-builder-design-system/v1",
+  "id": "spark",
+  "name": "Spark",
+  "category": "mixed",
+  "description": "Near-black cool canvas with a pastel pink, lavender and sky-blue gradient kept for the one thing that matters: the call to action, a key word, a selected edge. Campaign art adds deep indigo fields, holographic foil lettering, faceted crystals and four-point sparkles.",
+  "files": {
+    "design": "DESIGN.md",
+    "tokens": "tokens.css"
+  }
+}

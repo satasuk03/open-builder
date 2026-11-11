@@ -22,7 +22,7 @@ Open Builder is an open-source workspace for generating, editing, and previewing
 
 - **Code, Plan, and Design** — Build directly, approve a plan first, or create a multi-page product prototype.
 - **Live preview** — Edit projects with 20+ framework templates, a code editor, console, and responsive device previews.
-- **Visual editing** — Arrange pages on a design canvas, choose from 36 design systems, select elements in 19 preview templates, and annotate screenshots.
+- **Visual editing** — Arrange pages on a design canvas, choose from 37 design systems, select elements in 19 preview templates, and annotate screenshots.
 - **Project history** — Keep snapshots and branches, reuse project starters, and download source or supported static deployment ZIPs.
 - **Your choice of models** — Use OpenAI, Anthropic, Google, or compatible APIs; desktop also supports Codex, Claude, Pi, and Antigravity CLIs.
 - **Tools and collaboration** — Connect MCP servers, load Skills, search the web, and delegate scoped work to subagents.

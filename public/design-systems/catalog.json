@@ -1,5 +1,39 @@
 [
   {
+    "id": "spark",
+    "name": "Spark",
+    "previewPath": "/design-systems/previews/spark.webp",
+    "category": "mixed",
+    "tags": [
+      "brand",
+      "gradient",
+      "dark",
+      "pastel",
+      "holographic",
+      "banner",
+      "anime",
+      "thai",
+      "品牌",
+      "渐变",
+      "全息"
+    ],
+    "bestFor": {
+      "en": "AI character and story products, Thai social banners, sale and top-up promotions, feature announcements",
+      "zh": "AI 角色与故事产品、泰语社交横幅、促销与充值活动、功能公告"
+    },
+    "avoidFor": {
+      "en": "Dense enterprise dashboards or light, conservative editorial layouts",
+      "zh": "高密度企业后台或浅色保守的编辑版式"
+    },
+    "digest": "9bbdfcad80a99d333b6763dac90a9b7fad05ca7a6052d01545c74223a1c176b2",
+    "version": "2.0.0",
+    "files": {
+      "manifest": "spark/manifest.json",
+      "design": "spark/DESIGN.md",
+      "tokens": "spark/tokens.css"
+    }
+  },
+  {
     "id": "linear",
     "name": "Linear",
     "previewPath": "/design-systems/previews/linear.webp",

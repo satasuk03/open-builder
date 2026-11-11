@@ -66,11 +66,11 @@ for (const viewport of [
     const cards = dialog.locator("button:has(img)");
     const next = dialog.getByRole("button", { name: "Next page", exact: true });
     const scroll = dialog.getByTestId("design-system-scroll-region");
-    await expect(dialog.getByText("36 systems · page 1 of 4")).toBeVisible();
+    await expect(dialog.getByText("37 systems · page 1 of 5")).toBeVisible();
 
     const seen: string[] = [];
-    for (let current = 1; current <= 4; current++) {
-      await expect(cards).toHaveCount(9);
+    for (let current = 1; current <= 5; current++) {
+      await expect(cards).toHaveCount(current < 5 ? 9 : 1);
       seen.push(
         ...(await cards
           .locator("img")
@@ -85,18 +85,18 @@ for (const viewport of [
       });
       await expect(search).toBeInViewport();
       await expect(next).toBeInViewport();
-      if (current < 4) {
+      if (current < 5) {
         await next.click();
         await expect(
-          dialog.getByText(`Page ${current + 1} of 4`, { exact: true }),
+          dialog.getByText(`Page ${current + 1} of 5`, { exact: true }),
         ).toBeVisible();
         await expect
           .poll(() => scroll.evaluate((element) => element.scrollTop))
           .toBe(0);
-        if (current < 3) await expect(next).toBeFocused();
+        if (current < 4) await expect(next).toBeFocused();
       }
     }
-    expect(new Set(seen).size).toBe(36);
+    expect(new Set(seen).size).toBe(37);
     await expect(next).toBeDisabled();
 
     await search.fill("  磁带   机械  ");

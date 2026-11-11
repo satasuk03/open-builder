@@ -530,13 +530,24 @@ describe("DesignSystemPanel", () => {
   it("orders user sources after built-ins and clamps the last page when they shrink", async () => {
     const storage = new MemoryDesignSystemStorage();
     const registry = new DesignSystemRegistry(storage);
-    await registry.confirmImport(
-      (await designPackage("custom-alpha", "Alpha Custom", "custom")).package,
-    );
+    const builtInPages = Math.ceil(BUNDLED_DESIGN_SYSTEMS.length / 9);
+    const customCount = ((9 - (BUNDLED_DESIGN_SYSTEMS.length % 9)) % 9) + 1;
+    for (let index = 1; index <= customCount; index += 1) {
+      await registry.confirmImport(
+        (
+          await designPackage(
+            `custom-alpha-${index}`,
+            `Alpha Custom ${index}`,
+            "custom",
+          )
+        ).package,
+      );
+    }
     await registry.confirmImport(
       (await designPackage("imported-beta", "Beta Imported", "imported"))
         .package,
     );
+    const allPages = builtInPages + 1;
     useConversationStore.getState().createConversation();
     const { rerender } = render(
       <TooltipProvider>
@@ -557,7 +568,7 @@ describe("DesignSystemPanel", () => {
     await userEvent.type(search, "a");
     await userEvent.click(screen.getByRole("button", { name: "Next page" }));
     await waitFor(() =>
-      expect(screen.getAllByText(/Page 2 of 5/i).length).toBeGreaterThan(0),
+      expect(screen.getAllByText(/Page 2 of \d+/i).length).toBeGreaterThan(0),
     );
     body.scrollTop = 73;
     await userEvent.click(screen.getByRole("button", { name: /New custom/i }));
@@ -570,7 +581,7 @@ describe("DesignSystemPanel", () => {
     expect(
       screen.getByRole("textbox", { name: "Search design systems" }),
     ).toHaveValue("a");
-    expect(screen.getAllByText(/Page 2 of 5/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Page 2 of \d+/i).length).toBeGreaterThan(0);
     expect(screen.getByTestId("design-system-scroll-region")).toBe(body);
 
     rerender(
@@ -604,12 +615,13 @@ describe("DesignSystemPanel", () => {
     useConversationStore.getState().createConversation();
     await waitFor(() => expect(reopenedSearch).toHaveValue(""));
 
-    for (let pageIndex = 1; pageIndex < 5; pageIndex += 1) {
+    for (let pageIndex = 1; pageIndex < allPages; pageIndex += 1) {
       await userEvent.click(screen.getByRole("button", { name: "Next page" }));
       await waitFor(() =>
         expect(
-          screen.getAllByText(new RegExp(`Page ${pageIndex + 1} of 5`, "i"))
-            .length,
+          screen.getAllByText(
+            new RegExp(`Page ${pageIndex + 1} of ${allPages}`, "i"),
+          ).length,
         ).toBeGreaterThan(0),
       );
     }
@@ -638,7 +650,11 @@ describe("DesignSystemPanel", () => {
       </TooltipProvider>,
     );
     await waitFor(() =>
-      expect(screen.getAllByText(/Page 4 of 4/i).length).toBeGreaterThan(0),
+      expect(
+        screen.getAllByText(
+          new RegExp(`Page ${builtInPages} of ${builtInPages}`, "i"),
+        ).length,
+      ).toBeGreaterThan(0),
     );
   });
 

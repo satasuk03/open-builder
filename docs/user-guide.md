@@ -61,7 +61,7 @@ The root `design-project.json` is the project blueprint for pages, routes, share
 
 ### Design systems and tokens
 
-Choose from 36 bundled visual references, import a package, or create a custom system from a name and three rule groups. **Auto** lets an isolated model decision choose a system or **None**. Selecting a system for an existing project starts its application workflow; an empty project uses it for the next Design request.
+Choose from 37 bundled visual references, import a package, or create a custom system from a name and three rule groups. **Auto** lets an isolated model decision choose a system or **None**. Selecting a system for an existing project starts its application workflow; an empty project uses it for the next Design request.
 
 Imports use `manifest.json`, `DESIGN.md`, and `tokens.css`. Packages are validated before saving and never silently overwrite an existing ID. A standalone legacy `DESIGN.md` remains a visual reference until explicitly upgraded. Token edits can be previewed before saving; a save updates canonical files and creates a snapshot.
 
