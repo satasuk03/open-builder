@@ -29,6 +29,7 @@ For this request, this block supersedes the design_mode guidance about runnable,
 - Empty project: call init_project with the "static" template. A single index.html is the artboard. No router, no design-project.json pages, no hover, focus, or loading states, no responsive breakpoints.
 - Set html, body { margin: 0; width: ${w}px; height: ${h}px; overflow: hidden } and give one root element exactly ${w}px by ${h}px with position: relative. Size everything in px. Never use vw, vh, viewport percentages, or media queries.
 - Draw shapes, icons, logos, dividers, and text effects as inline <svg>. Write copy as real HTML text; web fonts are fine.
+- Do not put backdrop-filter directly on an element with border-radius: the PNG export does not clip the blur to its rounded corners. Put the blurred layer inside a wrapper that has the same border-radius and overflow: hidden.
 - For photographic or illustrative imagery, call generate_image when it is available (aspect_ratio "${closestImageAspectRatio(preset)}") and reference the returned publicPath, for example <img src="/generated/hero.png">. Never hotlink remote images.
 - Keep all text inside a ${inset}px safe inset. The headline must stay legible at 50% scale.
 - Do not request responsive capture_preview_evidence views. The host previews the artboard at its exact size.

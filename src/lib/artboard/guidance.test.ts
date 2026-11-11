@@ -13,6 +13,14 @@ describe("artboardPromptContext", () => {
     expect(text).toContain('"static" template');
   });
 
+  it("steers rounded backdrop blur into a clipping wrapper the PNG export renders", () => {
+    const text = artboardPromptContext(artboardById("og"));
+    expect(text).toContain(
+      "Do not put backdrop-filter directly on an element with border-radius",
+    );
+    expect(text).toContain("same border-radius and overflow: hidden");
+  });
+
   it("uses the portrait ratio for a story", () => {
     const text = artboardPromptContext(artboardById("story"));
     expect(text).toContain("exactly 1080x1920 CSS px");

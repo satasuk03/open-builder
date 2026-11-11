@@ -418,6 +418,7 @@ describe("capture runtime script entry", () => {
         expect.any(Function),
       );
       expect(context.htmlToImage).toBeUndefined();
+      expect(context.modernScreenshot).toBeUndefined();
       expect(outerExports).toEqual({});
       expect(define).not.toHaveBeenCalled();
     },
@@ -432,6 +433,7 @@ function canvasRuntime(
     node: unknown,
     options: Record<string, unknown>,
   ) => Promise<unknown>,
+  modernScreenshot?: { domToCanvas: (...args: unknown[]) => unknown },
 ) {
   const events: string[] = [];
   const images: FakeImage[] = [];
@@ -501,15 +503,16 @@ function canvasRuntime(
           canvasHeight: number;
           pixelRatio: number;
           signal?: AbortSignal;
-        },
+        } & Record<string, unknown>,
       ) => canvas as unknown as HTMLCanvasElement,
     ),
   };
   runInNewContext(
-    `${captureCanvasAdapterSource.replace(/^export default /m, "")}\ninstallCaptureCanvasAdapter(runtime, html2canvas);`,
+    `${captureCanvasAdapterSource.replace(/^export default /m, "")}\ninstallCaptureCanvasAdapter(runtime, html2canvas, modernScreenshot);`,
     {
       runtime,
       html2canvas,
+      modernScreenshot,
       Image: FakeImage,
       document: { createElement: () => canvas },
       setTimeout,
@@ -834,17 +837,106 @@ describe("html2canvas primary rendering", () => {
     expect(remove).toHaveBeenCalledOnce();
     expect(fixture.runtime.toSvg).not.toHaveBeenCalled();
   });
-  it("does not apply evidence pixel limits to an annotation fallback", async () => {
-    const fixture = canvasRuntime(["success"]);
-    const annotationOptions = {
-      ...options,
-      canvasWidth: 1440,
-      canvasHeight: 10000,
-      output: "annotation",
-    };
+});
+
+describe("annotation rendering", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+  const style = { width: "1200px", height: "630px", top: "0px", left: "0px" };
+  const filter = () => true;
+  const options = {
+    output: "annotation",
+    canvasWidth: 2400,
+    canvasHeight: 1260,
+    pixelRatio: 1,
+    region: { x: 0, y: 0, width: 1200, height: 630 },
+    scale: 2,
+    style,
+    filter,
+  };
+  function sizedCanvas(width: number, height: number) {
+    return { width, height };
+  }
+
+  it("renders the bridge region at the export scale with modern-screenshot only", async () => {
+    const rendered = sizedCanvas(2400, 1260);
+    const domToCanvas = vi.fn(async () => rendered);
+    const html2canvas = vi.fn();
+    const fixture = canvasRuntime([], html2canvas, { domToCanvas });
+    const node = {} as HTMLElement;
+
+    await expect(fixture.runtime.toCanvas(node, options)).resolves.toBe(
+      rendered,
+    );
+    expect(domToCanvas).toHaveBeenCalledWith(node, {
+      width: 1200,
+      height: 630,
+      scale: 2,
+      style,
+      filter,
+      timeout: 15000,
+    });
+    expect(html2canvas).not.toHaveBeenCalled();
+    expect(fixture.runtime.toSvg).not.toHaveBeenCalled();
+  });
+
+  it("has no evidence pixel limit", async () => {
+    const rendered = sizedCanvas(1440, 10000);
+    const fixture = canvasRuntime([], undefined, {
+      domToCanvas: async () => rendered,
+    });
     await expect(
-      fixture.runtime.toCanvas({} as HTMLElement, annotationOptions),
-    ).resolves.toBe(fixture.canvas);
-    expect(fixture.canvas).toMatchObject({ width: 1440, height: 10000 });
+      fixture.runtime.toCanvas({} as HTMLElement, {
+        ...options,
+        canvasWidth: 1440,
+        canvasHeight: 10000,
+        region: { x: 0, y: 0, width: 1440, height: 10000 },
+        scale: 1,
+      }),
+    ).resolves.toBe(rendered);
+  });
+
+  it("rejects and releases a canvas that is not the requested pixel size", async () => {
+    const rendered = sizedCanvas(1200, 630);
+    const fixture = canvasRuntime([], undefined, {
+      domToCanvas: async () => rendered,
+    });
+    await expect(
+      fixture.runtime.toCanvas({} as HTMLElement, options),
+    ).rejects.toThrow("Screenshot canvas allocation failed.");
+    expect(rendered).toEqual({ width: 0, height: 0 });
+  });
+
+  it("reports a renderer failure without falling back to another renderer", async () => {
+    const html2canvas = vi.fn();
+    const fixture = canvasRuntime([], html2canvas, {
+      domToCanvas: async () => {
+        throw new Error("font fetch failed");
+      },
+    });
+    await expect(
+      fixture.runtime.toCanvas({} as HTMLElement, options),
+    ).rejects.toThrow("Screenshot rendering failed: font fetch failed");
+    expect(html2canvas).not.toHaveBeenCalled();
+    expect(fixture.runtime.toSvg).not.toHaveBeenCalled();
+  });
+
+  it("cancels immediately and releases a canvas that arrives later", async () => {
+    let settle: (canvas: unknown) => void = () => {};
+    const fixture = canvasRuntime([], undefined, {
+      domToCanvas: () => new Promise((resolve) => (settle = resolve)),
+    });
+    const controller = new AbortController();
+    const pending = fixture.runtime.toCanvas({} as HTMLElement, {
+      ...options,
+      signal: controller.signal,
+    });
+    await Promise.resolve();
+    controller.abort();
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    const late = sizedCanvas(2400, 1260);
+    settle(late);
+    await vi.waitFor(() => expect(late).toEqual({ width: 0, height: 0 }));
   });
 });
