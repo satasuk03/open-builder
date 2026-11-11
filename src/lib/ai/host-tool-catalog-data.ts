@@ -50,6 +50,7 @@ const TOOL_ZH_NAMES: Readonly<Record<string, string>> = Object.freeze({
   project_health_check: "项目健康检查",
   install_component: "安装组件",
   screenshot_to_code: "截图转代码",
+  generate_image: "生成图片",
   apply_design_style: "应用设计风格",
   submit_design_review: "提交设计审查",
   set_default_preview_view: "设置默认预览视图",
@@ -86,6 +87,7 @@ const TOOL_ICON_KEYS: Readonly<Record<string, string>> = Object.freeze({
   move_file: "file-move",
   install_component: "component",
   screenshot_to_code: "screenshot",
+  generate_image: "image-search",
   apply_design_style: "design-style",
   submit_design_review: "design",
   set_default_preview_view: "preview",
@@ -288,6 +290,12 @@ export const HOST_TOOL_DESCRIPTORS: readonly HostToolRecord[] = Object.freeze([
   ),
   hostRecord(
     "screenshot_to_code",
+    "network",
+    ["network", "write_project"],
+    CHAT_ONLY,
+  ),
+  hostRecord(
+    "generate_image",
     "network",
     ["network", "write_project"],
     CHAT_ONLY,

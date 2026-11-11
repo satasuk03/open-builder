@@ -34,6 +34,7 @@ import {
   createApplyDesignStyleHandler,
 } from "./design-styles";
 import { createProjectHealthCheckHandler } from "./project-health";
+import { createForkToolHandlers, type ForkToolDeps } from "./fork-tools";
 import { PROJECT_HEALTH_CHECK_TOOL } from "./project-health-tool";
 import { formatConsoleLogs, type ConsoleLog } from "./console-log-format";
 import { getBuiltinSearchConfig } from "../ai/provider";
@@ -111,6 +112,7 @@ export interface BuildToolHandlersArgs {
   capturePreviewEvidence?: NonNullable<GeneratorOptions["customToolHandler"]>;
   capturePreviewSequence?: NonNullable<GeneratorOptions["customToolHandler"]>;
   designDiagnostics?: NonNullable<GeneratorOptions["customToolHandler"]>;
+  forkTools?: ForkToolDeps;
 }
 
 export interface BuiltToolHandlers {
@@ -141,6 +143,7 @@ export async function buildToolHandlers(
     capturePreviewEvidence,
     capturePreviewSequence,
     designDiagnostics,
+    forkTools,
   } = args;
   const runtimePlatform = await detectRuntimePlatform();
 
@@ -361,6 +364,10 @@ export async function buildToolHandlers(
     }
   }
 
+  const fork = createForkToolHandlers(forkTools, apiConfig, features);
+  for (const [name, handler] of fork.handlers)
+    runtimeHandlers.set(name, handler);
+
   const combinedToolHandler = async (
     name: string,
     handlerArgs: unknown,
@@ -408,6 +415,7 @@ export async function buildToolHandlers(
         }
       : {}),
     ...(skillsAvailable ? skillTools : {}),
+    ...fork.tools,
   };
 
   return {

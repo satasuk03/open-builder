@@ -15,6 +15,7 @@ import { MEMORY_TOOLS } from "../tools/memory";
 import { DISPATCH_SUBAGENT_TOOL } from "../tools/subagent-tool";
 import { INSTALL_COMPONENT_TOOL } from "../tools/install-component";
 import { SCREENSHOT_TO_CODE_TOOL } from "../tools/screenshot-to-code";
+import { FORK_TOOL_DEFINITIONS } from "../tools/fork-tools";
 import { APPLY_DESIGN_STYLE_TOOL } from "../tools/design-styles";
 import { PROJECT_HEALTH_CHECK_TOOL } from "../tools/project-health-tool";
 import { SUBMIT_DESIGN_REVIEW_TOOL } from "../design/review-tool";
@@ -513,6 +514,7 @@ export const STATIC_TOOL_DEFINITIONS: ToolSet = {
   ...BASE_SKILL_TOOLS,
   ...SCRIPT_SKILL_TOOL,
   ...DESIGN_HOST_TOOLS,
+  ...FORK_TOOL_DEFINITIONS,
 };
 
 function attachStaticDefinitions(

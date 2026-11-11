@@ -1760,12 +1760,22 @@ export function useGenerator({
         .getState()
         .isAssetSearchConfigured();
 
+      const { createProjectImageSink } =
+        await import("../lib/tools/generate-image");
       const {
         customToolSet,
         combinedToolHandler,
         providerToolNames,
         runtimePlatform,
       } = await runtime.buildToolHandlers({
+        forkTools: {
+          conversationId: generatorConversationId,
+          imageSink: createProjectImageSink({
+            conversationId: generatorConversationId,
+            isCurrent: isCurrentCandidate,
+            syncGeneratorFiles: (files) => candidate?.setFiles(files),
+          }),
+        },
         features: {
           builtinSearch: isBuiltinSearch,
           webSearch: webConfigured,
