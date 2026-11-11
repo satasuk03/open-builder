@@ -496,6 +496,11 @@ export const zh = {
     getKey: "前往 OpenRouter 获取密钥",
     moreSettings: "打开完整设置",
   },
+  imageResult: {
+    title: "已生成图片",
+    alt: "生成的图片 {path}",
+    missing: "已不在项目中",
+  },
   sessions: {
     title: "会话列表",
     close: "关闭会话列表",

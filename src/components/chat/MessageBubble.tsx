@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { ToolCallCard } from "./ToolCallCard";
 import { AgnesMediaResult, agnesToolNameForBlock } from "./AgnesMediaResult";
+import { ProjectImageResultCard } from "./ProjectImageResultCard";
+import { readProjectImageAssetContent } from "../../lib/project-assets/tool-result";
 import { PlanApprovalCard } from "./PlanApprovalCard";
 import {
   AskUserAnswerSummary,
@@ -276,6 +278,14 @@ export const MessageBubble = memo(function MessageBubble({
         if (block.type === "tool") {
           if (agnesToolNameForBlock(block)) {
             return <AgnesMediaResult key={block.id} block={block} />;
+          }
+          const projectImage = readProjectImageAssetContent(
+            block.toolOutput?.structuredContent,
+          );
+          if (projectImage) {
+            return (
+              <ProjectImageResultCard key={block.id} content={projectImage} />
+            );
           }
           const pending = pendingInteractions.find(
             (item) =>

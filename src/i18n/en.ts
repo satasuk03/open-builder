@@ -534,6 +534,11 @@ export const en: typeof zh = {
     getKey: "Get a key from OpenRouter",
     moreSettings: "Open full settings",
   },
+  imageResult: {
+    title: "Generated image",
+    alt: "Generated image {path}",
+    missing: "No longer in the project",
+  },
   sessions: {
     title: "Sessions",
     close: "Close sessions",
