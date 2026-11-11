@@ -9,6 +9,7 @@ import {
   GENERATE_IMAGE_TOOL,
   type ProjectImageSink,
 } from "./generate-image";
+import { createSetArtboardHandler, SET_ARTBOARD_TOOL } from "./set-artboard";
 
 /**
  * The single entry point for tools this fork adds on top of upstream.
@@ -18,6 +19,7 @@ import {
  */
 export const FORK_TOOL_DEFINITIONS: ToolSet = {
   ...GENERATE_IMAGE_TOOL,
+  ...SET_ARTBOARD_TOOL,
 };
 
 export interface ForkToolDeps {
@@ -42,6 +44,12 @@ export function createForkToolHandlers(
 ): ForkTools {
   const forkTools: ForkTools = { tools: {}, handlers: new Map() };
   if (!deps || features.localAgent) return forkTools;
+
+  Object.assign(forkTools.tools, SET_ARTBOARD_TOOL);
+  forkTools.handlers.set(
+    "set_artboard",
+    createSetArtboardHandler({ conversationId: deps.conversationId }),
+  );
 
   const imageClient = createOpenRouterImageClient(apiConfig);
   if (imageClient) {

@@ -27,7 +27,10 @@ function toolNames(...input: Parameters<typeof createForkToolHandlers>) {
 
 describe("createForkToolHandlers", () => {
   it("offers generate_image for an API run on OpenRouter with a key and a sink", () => {
-    expect(toolNames(deps, openRouter, {})).toEqual(["generate_image"]);
+    expect(toolNames(deps, openRouter, {})).toEqual([
+      "set_artboard",
+      "generate_image",
+    ]);
   });
 
   it.each([
@@ -46,9 +49,19 @@ describe("createForkToolHandlers", () => {
     ["no key", deps, { ...openRouter, apiKey: "" }, {}],
     ["no sink", undefined, openRouter, {}],
     ["the local CLI", deps, openRouter, { localAgent: true }],
-  ] as const)("offers nothing with %s", (_label, d, api, features) => {
-    expect(toolNames(d, api, features)).toEqual([]);
-  });
+  ] as const)(
+    "offers no generate_image with %s",
+    (_label, d, api, features) => {
+      expect(toolNames(d, api, features)).not.toContain("generate_image");
+    },
+  );
+});
+
+it.each([
+  ["no fork deps", undefined, {}],
+  ["the local CLI", deps, { localAgent: true }],
+] as const)("offers no fork tool with %s", (_label, d, features) => {
+  expect(toolNames(d, openRouter, features)).toEqual([]);
 });
 
 describe("generate_image catalog entry", () => {

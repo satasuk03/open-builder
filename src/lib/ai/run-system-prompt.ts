@@ -12,6 +12,7 @@ export interface RunSystemPromptSections {
   workspaceMode?: WorkspaceMode;
   designMode?: string;
   designSystem?: string;
+  artboard?: string;
 }
 
 /** Compose only request-serving prompt context. Utility calls use separate prompts. */
@@ -25,6 +26,7 @@ export function buildRunSystemPromptSuffix({
   workspaceMode = "auto",
   designMode = "",
   designSystem = "",
+  artboard = "",
 }: RunSystemPromptSections): string {
   if (mode === "auto_qa" || mode === "subagent") return "";
 
@@ -34,7 +36,7 @@ export function buildRunSystemPromptSuffix({
     buildCustomSystemPromptSection(customSystemPrompt) +
     mandatorySkills +
     ((mode === "chat" || mode === "plan") && workspaceMode === "design"
-      ? designMode + designSystem
+      ? designMode + designSystem + artboard
       : "") +
     (mode === "plan" ? planMode : "")
   );

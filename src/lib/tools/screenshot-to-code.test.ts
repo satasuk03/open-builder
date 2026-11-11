@@ -32,11 +32,9 @@ const compressedUrl = `data:image/jpeg;base64,${Buffer.from(jpeg).toString("base
 
 describe("screenshot-to-code image preparation", () => {
   beforeEach(() => {
-    mocks.generate
-      .mockReset()
-      .mockResolvedValue({
-        text: "export default function Page() { return null; }",
-      });
+    mocks.generate.mockReset().mockResolvedValue({
+      text: "export default function Page() { return null; }",
+    });
     mocks.compress
       .mockReset()
       .mockResolvedValue(
